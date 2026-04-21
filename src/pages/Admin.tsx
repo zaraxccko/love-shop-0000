@@ -206,7 +206,7 @@ const AdminPage = () => {
       <Dialog open={!!editingP} onOpenChange={(o) => !o && setEditingP(null)}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingP?.name ? t("admin.edit") : t("admin.add")}</DialogTitle>
+            <DialogTitle>{loc(editingP?.name, "ru") ? t("admin.edit") : t("admin.add")}</DialogTitle>
           </DialogHeader>
           {editingP && (
             <div className="space-y-3">
@@ -461,7 +461,7 @@ const AdminPage = () => {
       <Dialog open={!!editingC} onOpenChange={(o) => !o && setEditingC(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingC?.name ? t("admin.edit") : t("admin.add")}</DialogTitle>
+            <DialogTitle>{loc(editingC?.name, "ru") ? t("admin.edit") : t("admin.add")}</DialogTitle>
           </DialogHeader>
           {editingC && (
             <div className="space-y-3">
