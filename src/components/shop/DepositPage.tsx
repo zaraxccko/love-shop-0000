@@ -9,13 +9,15 @@ import { toast } from "sonner";
 
 interface DepositPageProps {
   onBack: () => void;
+  /** Called when the user taps "Done" after submitting a deposit. Defaults to onBack. */
+  onDone?: () => void;
   /** Suggested top-up amount (e.g. shortfall to cover an order) */
   suggested?: number;
 }
 
 const QUICK = [20, 50, 100, 200, 500];
 
-export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
+export const DepositPage = ({ onBack, onDone, suggested }: DepositPageProps) => {
   const lang = useI18n((s) => s.lang) ?? "ru";
   const balance = useAccount((s) => s.balanceUSD);
   const createDeposit = useAccount((s) => s.createDeposit);
@@ -217,7 +219,10 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
                   </span>
                 </div>
                 <button
-                  onClick={() => setPendingId(null)}
+                  onClick={() => {
+                    setPendingId(null);
+                    (onDone ?? onBack)();
+                  }}
                   className="w-full bg-card border border-border font-bold py-4 rounded-2xl active:scale-[0.98]"
                 >
                   {tr("Готово", "Done")}
