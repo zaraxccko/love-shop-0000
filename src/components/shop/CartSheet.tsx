@@ -27,7 +27,6 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
   const total = useCart((s) => s.totalTHB());
   const t = useT();
   const lang = useI18n((s) => s.lang) ?? "ru";
-  const [delivery, setDelivery] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
