@@ -9,10 +9,10 @@ export const CURRENCIES: { code: Currency; label: string; short: string; network
   { code: "TRX", label: "Tron", short: "TRX", network: "Tron", icon: "🔺" },
 ];
 
-export type CategorySlug = "all" | "gummies" | "chocolate" | "cookies" | "drinks" | "vapes";
+export type CategorySlug = string;
 
 export interface Category {
-  slug: CategorySlug;
+  slug: string;
   name: string;
   emoji: string;
   gradient: string;
@@ -22,7 +22,7 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  category: Exclude<CategorySlug, "all">;
+  category: string;
   priceTHB: number;
   thcMg?: number;
   cbdMg?: number;
@@ -30,8 +30,11 @@ export interface Product {
   inStock: number;
   gradient: string;
   emoji: string;
+  imageUrl?: string;
   featured?: boolean;
   badge?: string;
+  /** city slugs where product is available; empty = everywhere */
+  cities?: string[];
 }
 
 export interface CartLine {

@@ -1,0 +1,137 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export type Lang = "ru" | "en";
+
+const dict = {
+  ru: {
+    "splash.title": "Добро пожаловать",
+    "splash.subtitle": "Выберите язык",
+    "loc.title": "Выберите локацию",
+    "loc.subtitle": "Ассортимент зависит от города",
+    "loc.pickCountry": "Страна",
+    "loc.pickCity": "Город",
+    "loc.back": "Назад",
+    "loc.change": "Сменить",
+    "header.openTill": "открыто до 22:00",
+    "cat.all": "Всё",
+    "section.allProducts": "Все товары",
+    "section.category": "Категория",
+    "section.count": "товаров",
+    "section.empty": "Здесь пока пусто",
+    "card.add": "Добавить",
+    "cart.title": "Корзина",
+    "cart.empty.title": "Пока пусто",
+    "cart.empty.sub": "Добавьте что-нибудь сладкое",
+    "cart.total": "Итого",
+    "cart.checkout": "Оформить заказ",
+    "cart.note": "Самовывоз • оплата криптой",
+    "hero.pickOfDay": "⭐ Подборка дня",
+    "admin.title": "Админ-панель",
+    "admin.products": "Товары",
+    "admin.categories": "Категории",
+    "admin.add": "Добавить",
+    "admin.save": "Сохранить",
+    "admin.cancel": "Отмена",
+    "admin.delete": "Удалить",
+    "admin.edit": "Редактировать",
+    "admin.name": "Название",
+    "admin.description": "Описание",
+    "admin.price": "Цена (THB)",
+    "admin.thc": "THC (мг)",
+    "admin.cbd": "CBD (мг)",
+    "admin.weight": "Вес/кол-во",
+    "admin.stock": "В наличии",
+    "admin.emoji": "Эмодзи",
+    "admin.image": "Изображение",
+    "admin.imageHint": "Загрузите картинку или оставьте эмодзи",
+    "admin.category": "Категория",
+    "admin.cities": "Города (где доступен)",
+    "admin.gradient": "Фон карточки",
+    "admin.featured": "На главную",
+    "admin.badge": "Бейдж",
+    "admin.back": "← На главную",
+    "admin.reset": "Сбросить к примерам",
+    "admin.noProducts": "Товаров пока нет",
+    "admin.noCategories": "Категорий пока нет",
+    "admin.slug": "Slug (id)",
+    "admin.openAdmin": "Открыть админку",
+  },
+  en: {
+    "splash.title": "Welcome",
+    "splash.subtitle": "Choose your language",
+    "loc.title": "Choose location",
+    "loc.subtitle": "Assortment depends on the city",
+    "loc.pickCountry": "Country",
+    "loc.pickCity": "City",
+    "loc.back": "Back",
+    "loc.change": "Change",
+    "header.openTill": "open till 22:00",
+    "cat.all": "All",
+    "section.allProducts": "All products",
+    "section.category": "Category",
+    "section.count": "items",
+    "section.empty": "Nothing here yet",
+    "card.add": "Add",
+    "cart.title": "Cart",
+    "cart.empty.title": "Empty",
+    "cart.empty.sub": "Add something sweet",
+    "cart.total": "Total",
+    "cart.checkout": "Checkout",
+    "cart.note": "Pickup only • crypto payment",
+    "hero.pickOfDay": "⭐ Pick of the day",
+    "admin.title": "Admin panel",
+    "admin.products": "Products",
+    "admin.categories": "Categories",
+    "admin.add": "Add",
+    "admin.save": "Save",
+    "admin.cancel": "Cancel",
+    "admin.delete": "Delete",
+    "admin.edit": "Edit",
+    "admin.name": "Name",
+    "admin.description": "Description",
+    "admin.price": "Price (THB)",
+    "admin.thc": "THC (mg)",
+    "admin.cbd": "CBD (mg)",
+    "admin.weight": "Weight/qty",
+    "admin.stock": "In stock",
+    "admin.emoji": "Emoji",
+    "admin.image": "Image",
+    "admin.imageHint": "Upload an image or keep emoji",
+    "admin.category": "Category",
+    "admin.cities": "Cities (where available)",
+    "admin.gradient": "Card background",
+    "admin.featured": "Featured",
+    "admin.badge": "Badge",
+    "admin.back": "← Back to shop",
+    "admin.reset": "Reset to samples",
+    "admin.noProducts": "No products yet",
+    "admin.noCategories": "No categories yet",
+    "admin.slug": "Slug (id)",
+    "admin.openAdmin": "Open admin",
+  },
+} as const;
+
+type Key = keyof typeof dict.ru;
+
+interface I18nState {
+  lang: Lang | null;
+  setLang: (l: Lang) => void;
+}
+
+export const useI18n = create<I18nState>()(
+  persist(
+    (set) => ({
+      lang: null,
+      setLang: (lang) => set({ lang }),
+    }),
+    { name: "loveshop-lang" }
+  )
+);
+
+export const useT = () => {
+  const lang = useI18n((s) => s.lang) ?? "ru";
+  return (key: Key) => dict[lang][key] ?? key;
+};
+
+export const tFor = (lang: Lang, key: Key) => dict[lang][key] ?? key;

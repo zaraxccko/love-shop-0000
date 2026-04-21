@@ -1,7 +1,6 @@
 import type { Category, Product } from "@/types/shop";
 
 export const CATEGORIES: Category[] = [
-  { slug: "all", name: "Всё", emoji: "✨", gradient: "gradient-primary" },
   { slug: "gummies", name: "Жевательное", emoji: "🍬", gradient: "gradient-grape" },
   { slug: "chocolate", name: "Шоколад", emoji: "🍫", gradient: "gradient-mango" },
   { slug: "cookies", name: "Печенье", emoji: "🍪", gradient: "gradient-mango" },
@@ -23,6 +22,7 @@ export const PRODUCTS: Product[] = [
     emoji: "🥭",
     featured: true,
     badge: "Хит",
+    cities: ["phuket", "bangkok", "pattaya", "samui"],
   },
   {
     id: "p2",
@@ -35,6 +35,7 @@ export const PRODUCTS: Product[] = [
     inStock: 18,
     gradient: "gradient-grape",
     emoji: "🍓",
+    cities: ["phuket", "bangkok", "bali"],
   },
   {
     id: "p3",
@@ -47,6 +48,7 @@ export const PRODUCTS: Product[] = [
     inStock: 30,
     gradient: "gradient-mango",
     emoji: "🍫",
+    cities: ["phuket", "bangkok", "pattaya", "samui", "bali", "kl"],
   },
   {
     id: "p4",
@@ -60,6 +62,7 @@ export const PRODUCTS: Product[] = [
     gradient: "gradient-mint",
     emoji: "🥥",
     badge: "Новинка",
+    cities: ["bali", "phuket"],
   },
   {
     id: "p5",
@@ -72,6 +75,7 @@ export const PRODUCTS: Product[] = [
     inStock: 20,
     gradient: "gradient-mango",
     emoji: "🍍",
+    cities: ["bangkok", "phuket", "samui"],
   },
   {
     id: "p6",
@@ -84,6 +88,7 @@ export const PRODUCTS: Product[] = [
     inStock: 15,
     gradient: "gradient-mint",
     emoji: "🧋",
+    cities: ["hochiminh", "danang", "nhatrang", "bangkok"],
   },
   {
     id: "p7",
@@ -96,6 +101,7 @@ export const PRODUCTS: Product[] = [
     inStock: 8,
     gradient: "gradient-mint",
     emoji: "💨",
+    cities: ["phuket", "bangkok", "pattaya", "kl"],
   },
   {
     id: "p8",
@@ -108,5 +114,6 @@ export const PRODUCTS: Product[] = [
     inStock: 14,
     gradient: "gradient-grape",
     emoji: "🫐",
+    cities: ["bali", "kl", "hochiminh"],
   },
 ];
