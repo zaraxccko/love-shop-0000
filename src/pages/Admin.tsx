@@ -450,34 +450,6 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                     }
                   />
                 </div>
-                <div>
-                  <Label>{t("admin.thc")}</Label>
-                  <Input
-                    type="number"
-                    value={editingP.thcMg ?? ""}
-                    onChange={(e) =>
-                      setEditingP({
-                        ...editingP,
-                        thcMg: e.target.value ? Number(e.target.value) : undefined,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label>{t("admin.cbd")}</Label>
-                  <Input
-                    type="number"
-                    value={editingP.cbdMg ?? ""}
-                    onChange={(e) =>
-                      setEditingP({
-                        ...editingP,
-                        cbdMg: e.target.value ? Number(e.target.value) : undefined,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label>{t("admin.weight")}</Label>
                   <Input
                     value={editingP.weight ?? ""}
                     onChange={(e) => setEditingP({ ...editingP, weight: e.target.value })}
