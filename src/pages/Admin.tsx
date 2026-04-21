@@ -239,6 +239,44 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
             <Plus className="w-4 h-4 mr-1" /> {t("admin.add")}
           </Button>
 
+          {activeCity?.districts && activeCity.districts.length > 0 && (
+            <div className="bg-card rounded-2xl p-3 shadow-card space-y-3">
+              <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Районы города
+              </div>
+              {activeCity.districts.map((d) => {
+                const items = visibleProducts.filter(
+                  (p) =>
+                    !p.districts ||
+                    p.districts.length === 0 ||
+                    p.districts.includes(d.slug)
+                );
+                return (
+                  <div key={d.slug} className="border-t pt-2 first:border-t-0 first:pt-0">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-sm">{d.name.ru}</div>
+                      <span className="text-[11px] text-muted-foreground">
+                        {items.length} товаров
+                      </span>
+                    </div>
+                    {items.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {items.map((p) => (
+                          <span
+                            key={p.id}
+                            className="text-[11px] bg-muted rounded-full px-2 py-0.5"
+                          >
+                            {p.emoji} {loc(p.name, "ru")}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {visibleProducts.length === 0 ? (
             <div className="py-10 text-center text-muted-foreground text-sm">
               {t("admin.noProducts")}
@@ -514,6 +552,59 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                   })}
                 </div>
               </div>
+
+              {(() => {
+                const selectedCities = allCities.filter((c) =>
+                  editingP.cities?.includes(c.slug)
+                );
+                const cityWithDistricts = selectedCities.filter(
+                  (c) => c.districts && c.districts.length > 0
+                );
+                if (cityWithDistricts.length === 0) return null;
+                return (
+                  <div>
+                    <Label>Районы</Label>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Если ничего не выбрано — товар доступен во всех районах выбранных городов.
+                    </p>
+                    <div className="space-y-3 mt-2">
+                      {cityWithDistricts.map((city) => (
+                        <div key={city.slug}>
+                          <div className="text-xs font-semibold mb-1">
+                            {city.country.flag} {city.name.ru}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {city.districts!.map((d) => {
+                              const checked =
+                                editingP.districts?.includes(d.slug) ?? false;
+                              return (
+                                <label
+                                  key={d.slug}
+                                  className="flex items-center gap-2 bg-muted rounded-lg p-2 text-xs"
+                                >
+                                  <Checkbox
+                                    checked={checked}
+                                    onCheckedChange={(v) => {
+                                      const set = new Set(editingP.districts ?? []);
+                                      if (v) set.add(d.slug);
+                                      else set.delete(d.slug);
+                                      setEditingP({
+                                        ...editingP,
+                                        districts: Array.from(set),
+                                      });
+                                    }}
+                                  />
+                                  {d.name.ru}
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
           <DialogFooter className="flex-row gap-2">
