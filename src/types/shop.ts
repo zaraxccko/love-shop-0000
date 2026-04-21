@@ -1,0 +1,77 @@
+export type Currency = "USDT_TRC20" | "USDT_TON" | "TON" | "BTC" | "SOL" | "TRX";
+
+export const CURRENCIES: { code: Currency; label: string; short: string; network: string; icon: string }[] = [
+  { code: "USDT_TRC20", label: "USDT", short: "USDT", network: "TRC-20 (Tron)", icon: "💵" },
+  { code: "USDT_TON", label: "USDT", short: "USDT", network: "TON", icon: "💵" },
+  { code: "TON", label: "Toncoin", short: "TON", network: "TON", icon: "💎" },
+  { code: "BTC", label: "Bitcoin", short: "BTC", network: "Bitcoin", icon: "₿" },
+  { code: "SOL", label: "Solana", short: "SOL", network: "Solana", icon: "◎" },
+  { code: "TRX", label: "Tron", short: "TRX", network: "Tron", icon: "🔺" },
+];
+
+export type CategorySlug = "all" | "gummies" | "chocolate" | "cookies" | "drinks" | "vapes";
+
+export interface Category {
+  slug: CategorySlug;
+  name: string;
+  emoji: string;
+  gradient: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  category: Exclude<CategorySlug, "all">;
+  priceTHB: number;
+  thcMg?: number;
+  cbdMg?: number;
+  weight?: string;
+  inStock: number;
+  gradient: string;
+  emoji: string;
+  featured?: boolean;
+  badge?: string;
+}
+
+export interface CartLine {
+  product: Product;
+  qty: number;
+}
+
+export type OrderStatus =
+  | "awaiting_payment"
+  | "verifying"
+  | "paid"
+  | "ready"
+  | "completed"
+  | "cancelled";
+
+export interface OrderPayment {
+  currency: Currency;
+  cryptoAmount: string;
+  walletAddress: string;
+  txHash?: string;
+  paidAt?: string;
+}
+
+export interface Order {
+  id: string;
+  shortId: string;
+  createdAt: string;
+  status: OrderStatus;
+  items: CartLine[];
+  totalTHB: number;
+  customer: { name: string; phone: string; pickupTime: string; note?: string };
+  payment: OrderPayment;
+  telegramUserId?: number;
+}
+
+export const ORDER_STATUS_META: Record<OrderStatus, { label: string; color: string; description: string }> = {
+  awaiting_payment: { label: "Ожидает оплату", color: "warning", description: "Переведите крипту и пришлите хеш" },
+  verifying: { label: "Проверяем", color: "primary", description: "Сверяем поступление" },
+  paid: { label: "Оплачен", color: "success", description: "Готовим заказ" },
+  ready: { label: "Готов к выдаче", color: "success", description: "Можно забирать" },
+  completed: { label: "Получен", color: "muted", description: "Спасибо!" },
+  cancelled: { label: "Отменён", color: "destructive", description: "" },
+};
