@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2, Truck } from "lucide-react";
+import { Minus, Plus, Trash2, Truck, Clock } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart, lineKey, DELIVERY_FEE_USD } from "@/store/cart";
 import { formatTHB } from "@/lib/format";
