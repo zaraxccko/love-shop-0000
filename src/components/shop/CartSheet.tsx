@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2, Truck } from "lucide-react";
+import { Minus, Plus, Trash2, Truck, Clock } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart, lineKey, DELIVERY_FEE_USD } from "@/store/cart";
 import { formatTHB } from "@/lib/format";
@@ -33,6 +33,8 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
   const subtotal = useCart((s) => s.subtotalUSD());
   const delivery = useCart((s) => s.delivery);
   const toggleDelivery = useCart((s) => s.toggleDelivery);
+  const deliveryAddress = useCart((s) => s.deliveryAddress);
+  const setDeliveryAddress = useCart((s) => s.setDeliveryAddress);
   const total = useCart((s) => s.totalTHB());
   const t = useT();
   const lang = useI18n((s) => s.lang) ?? "ru";
@@ -178,6 +180,31 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
               </div>
               <div className="font-bold text-sm">+${DELIVERY_FEE_USD}</div>
             </button>
+
+            {delivery && (
+              <div className="mb-3 space-y-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>
+                    {lang === "ru"
+                      ? "Время доставки: 40–60 минут"
+                      : "Delivery time: 40–60 minutes"}
+                  </span>
+                </div>
+                <textarea
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  maxLength={300}
+                  rows={2}
+                  placeholder={
+                    lang === "ru"
+                      ? "Точный адрес для курьера (улица, дом, отель, номер квартиры/виллы)"
+                      : "Exact address for courier (street, building, hotel, apt/villa number)"
+                  }
+                  className="w-full resize-none rounded-2xl bg-background border border-border px-3 py-2.5 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                />
+              </div>
+            )}
 
             {delivery && (
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">

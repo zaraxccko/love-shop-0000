@@ -21,6 +21,8 @@ export const DELIVERY_FEE_USD = 20;
 interface CartState {
   lines: CartLine[];
   delivery: boolean;
+  deliveryAddress: string;
+  setDeliveryAddress: (v: string) => void;
   setDelivery: (v: boolean) => void;
   toggleDelivery: () => void;
   add: (product: Product, opts?: AddOptions) => void;
@@ -44,6 +46,8 @@ export const useCart = create<CartState>()(
     (set, get) => ({
       lines: [],
       delivery: false,
+      deliveryAddress: "",
+      setDeliveryAddress: (v) => set({ deliveryAddress: v }),
       setDelivery: (v) => set({ delivery: v }),
       toggleDelivery: () => set((s) => ({ delivery: !s.delivery })),
       add: (product, opts) =>
@@ -71,7 +75,7 @@ export const useCart = create<CartState>()(
         set((state) => {
           const lines = state.lines.filter((l) => lineKey(l) !== key);
           // Если корзина опустела — сбрасываем доставку
-          return lines.length === 0 ? { lines, delivery: false } : { lines };
+          return lines.length === 0 ? { lines, delivery: false, deliveryAddress: "" } : { lines };
         }),
       setQty: (key, qty) =>
         set((state) => ({
@@ -80,7 +84,7 @@ export const useCart = create<CartState>()(
               ? state.lines.filter((l) => lineKey(l) !== key)
               : state.lines.map((l) => (lineKey(l) === key ? { ...l, qty } : l)),
         })),
-      clear: () => set({ lines: [], delivery: false }),
+      clear: () => set({ lines: [], delivery: false, deliveryAddress: "" }),
       totalQty: () => get().lines.reduce((s, l) => s + l.qty, 0),
       subtotalUSD: () =>
         get().lines.reduce(
