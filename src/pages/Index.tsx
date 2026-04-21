@@ -12,7 +12,7 @@ import { useTelegram } from "@/lib/telegram";
 import { useI18n, useT } from "@/lib/i18n";
 import { useLocation } from "@/store/location";
 import { useCatalog } from "@/store/catalog";
-import { Settings } from "lucide-react";
+
 
 const Index = () => {
   useTelegram();
