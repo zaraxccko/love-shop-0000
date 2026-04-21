@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Minus, Plus, Trash2, Truck, Clock } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart, lineKey, DELIVERY_FEE_USD } from "@/store/cart";
@@ -40,6 +41,25 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
   const lang = useI18n((s) => s.lang) ?? "ru";
   void useLocation((s) => s.city); // re-render on city change
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const deliveryBtnRef = useRef<HTMLButtonElement>(null);
+
+  const handleToggleDelivery = () => {
+    haptic("light");
+    const wasOn = delivery;
+    toggleDelivery();
+    if (!wasOn) {
+      // Scroll so the delivery button + newly revealed address field are visible
+      requestAnimationFrame(() => {
+        const container = scrollRef.current;
+        const btn = deliveryBtnRef.current;
+        if (!container || !btn) return;
+        const target = btn.offsetTop - 12;
+        container.scrollTo({ top: target, behavior: "smooth" });
+      });
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -51,7 +71,7 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
           <SheetTitle className="font-display text-2xl text-left">{t("cart.title")}</SheetTitle>
         </SheetHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-5 pb-4">
           {lines.length === 0 ? (
             <div className="py-16 text-center">
               <div className="text-6xl mb-3">🛍️</div>
@@ -147,11 +167,9 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
               })}
 
               <button
+                ref={deliveryBtnRef}
                 type="button"
-                onClick={() => {
-                  haptic("light");
-                  toggleDelivery();
-                }}
+                onClick={handleToggleDelivery}
                 className={`w-full mt-2 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition-colors ${
                   delivery
                     ? "gradient-primary text-primary-foreground shadow-glow"
