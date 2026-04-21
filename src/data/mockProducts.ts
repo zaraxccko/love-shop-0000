@@ -1,7 +1,6 @@
 import type { Category, Product } from "@/types/shop";
 
 export const CATEGORIES: Category[] = [
-  { slug: "all", name: "Всё", emoji: "✨", gradient: "gradient-primary" },
   { slug: "gummies", name: "Жевательное", emoji: "🍬", gradient: "gradient-grape" },
   { slug: "chocolate", name: "Шоколад", emoji: "🍫", gradient: "gradient-mango" },
   { slug: "cookies", name: "Печенье", emoji: "🍪", gradient: "gradient-mango" },

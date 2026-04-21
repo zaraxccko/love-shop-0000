@@ -9,10 +9,10 @@ export const CURRENCIES: { code: Currency; label: string; short: string; network
   { code: "TRX", label: "Tron", short: "TRX", network: "Tron", icon: "🔺" },
 ];
 
-export type CategorySlug = "all" | "gummies" | "chocolate" | "cookies" | "drinks" | "vapes";
+export type CategorySlug = string;
 
 export interface Category {
-  slug: CategorySlug;
+  slug: string;
   name: string;
   emoji: string;
   gradient: string;
