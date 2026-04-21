@@ -1,0 +1,39 @@
+import type { Product } from "@/types/shop";
+import { formatTHB } from "@/lib/format";
+
+interface HeroProps {
+  product: Product;
+  onClick?: () => void;
+}
+
+export const Hero = ({ product, onClick }: HeroProps) => {
+  return (
+    <button
+      onClick={onClick}
+      className="mx-5 mb-5 block w-[calc(100%-2.5rem)] text-left rounded-3xl gradient-hero p-5 relative overflow-hidden shadow-soft active:scale-[0.99] transition-[var(--transition-base)]"
+    >
+      <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/30 blur-2xl" />
+      <div className="absolute -right-2 bottom-0 text-[100px] leading-none opacity-90 select-none">
+        {product.emoji}
+      </div>
+      <div className="relative">
+        <div className="text-[11px] font-semibold uppercase tracking-widest text-foreground/70 mb-1">
+          ⭐ Подборка дня
+        </div>
+        <div className="font-display text-[22px] font-bold leading-tight text-foreground max-w-[60%]">
+          {product.name}
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          <span className="bg-card/90 backdrop-blur text-foreground text-xs font-bold px-3 py-1.5 rounded-full">
+            {formatTHB(product.priceTHB)}
+          </span>
+          {product.thcMg && (
+            <span className="bg-foreground/90 text-background text-xs font-semibold px-2.5 py-1.5 rounded-full">
+              THC {product.thcMg}mg
+            </span>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+};
