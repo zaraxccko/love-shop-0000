@@ -19,7 +19,7 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
   const lang = useI18n((s) => s.lang) ?? "ru";
   const balance = useAccount((s) => s.balanceUSD);
   const createDeposit = useAccount((s) => s.createDeposit);
-  const confirmDeposit = useAccount((s) => s.confirmDeposit);
+  const markPaid = useAccount((s) => s.markPaid);
   const cancelDeposit = useAccount((s) => s.cancelDeposit);
   void useAcc2((s) => s.deposits);
 
@@ -52,9 +52,10 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
   const confirmPaid = () => {
     if (!pending) return;
     haptic("success");
-    confirmDeposit(pending.id);
-    toast.success(tr("Баланс пополнен", "Balance topped up"));
-    setPendingId(null);
+    markPaid(pending.id);
+    toast.success(
+      tr("Заявка отправлена. Ждём подтверждения админа.", "Submitted. Waiting for admin confirmation.")
+    );
   };
 
   const cancel = () => {
