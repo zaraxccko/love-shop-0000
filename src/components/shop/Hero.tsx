@@ -39,11 +39,6 @@ export const Hero = ({ product, onClick }: HeroProps) => {
           <span className="bg-card/90 backdrop-blur text-foreground text-xs font-bold px-3 py-1.5 rounded-full">
             {formatTHB(product.priceTHB)}
           </span>
-          {product.thcMg && (
-            <span className="bg-foreground/90 text-background text-xs font-semibold px-2.5 py-1.5 rounded-full">
-              THC {product.thcMg}mg
-            </span>
-          )}
         </div>
       </div>
     </button>
