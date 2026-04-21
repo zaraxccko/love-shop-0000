@@ -8,11 +8,14 @@ import { CartSheet } from "@/components/shop/CartSheet";
 import { StickyCartBar } from "@/components/shop/StickyCartBar";
 import { SplashLanguage } from "@/components/shop/SplashLanguage";
 import { LocationPicker } from "@/components/shop/LocationPicker";
+import { ProductSheet } from "@/components/shop/ProductSheet";
 import { useTelegram } from "@/lib/telegram";
 import { useI18n, useT } from "@/lib/i18n";
 import { useLocation } from "@/store/location";
 import { useCatalog } from "@/store/catalog";
 import { useAuth } from "@/store/auth";
+import { findCity } from "@/data/locations";
+import type { Product } from "@/types/shop";
 import AdminPage from "./Admin";
 
 const Index = () => {
