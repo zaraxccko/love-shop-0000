@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { Trash2, Pencil, Plus, RotateCcw, ArrowLeft } from "lucide-react";
 import { useCatalog } from "@/store/catalog";
 import { useT } from "@/lib/i18n";
+import { loc } from "@/lib/loc";
 import { COUNTRIES } from "@/data/locations";
-import type { Category, Product } from "@/types/shop";
+import type { Category, Product, LocalizedString } from "@/types/shop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,8 +32,8 @@ const GRADIENTS = ["gradient-mango", "gradient-mint", "gradient-grape", "gradien
 
 const blankProduct = (): Product => ({
   id: `p_${Date.now().toString(36)}`,
-  name: "",
-  description: "",
+  name: { ru: "", en: "" },
+  description: { ru: "", en: "" },
   category: "",
   priceTHB: 0,
   weight: "",
@@ -44,10 +45,25 @@ const blankProduct = (): Product => ({
 
 const blankCategory = (): Category => ({
   slug: `cat_${Date.now().toString(36)}`,
-  name: "",
+  name: { ru: "", en: "" },
   emoji: "✨",
   gradient: "gradient-mango",
 });
+
+/** Read RU or EN from a LocalizedString safely. */
+const getLang = (v: LocalizedString | undefined, l: "ru" | "en"): string => {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  return v[l] ?? "";
+};
+const setLang = (
+  v: LocalizedString | undefined,
+  l: "ru" | "en",
+  val: string
+): LocalizedString => {
+  const base = typeof v === "object" && v !== null ? v : { ru: typeof v === "string" ? v : "", en: "" };
+  return { ...base, [l]: val };
+};
 
 const fileToDataUrl = (file: File) =>
   new Promise<string>((res, rej) => {
@@ -120,9 +136,9 @@ const AdminPage = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm truncate">{p.name || "—"}</div>
+                  <div className="font-semibold text-sm truncate">{loc(p.name, "ru") || "—"}</div>
                   <div className="text-[11px] text-muted-foreground truncate">
-                    {p.priceTHB} ฿ · {categories.find((c) => c.slug === p.category)?.name ?? p.category}
+                    {p.priceTHB} ฿ · {loc(categories.find((c) => c.slug === p.category)?.name, "ru") || p.category}
                   </div>
                   <div className="text-[10px] text-muted-foreground mt-0.5">
                     {p.cities?.length ? p.cities.join(", ") : "all cities"}
@@ -136,7 +152,7 @@ const AdminPage = () => {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm(`Delete "${p.name}"?`)) deleteProduct(p.id);
+                    if (confirm(`Delete "${loc(p.name, "ru")}"?`)) deleteProduct(p.id);
                   }}
                   className="w-8 h-8 rounded-full bg-background flex items-center justify-center active:scale-90"
                 >
@@ -163,7 +179,7 @@ const AdminPage = () => {
                   <span className="text-xl">{c.emoji}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm truncate">{c.name}</div>
+                  <div className="font-semibold text-sm truncate">{loc(c.name, "ru")}</div>
                   <div className="text-[11px] text-muted-foreground truncate">{c.slug}</div>
                 </div>
                 <button
@@ -174,7 +190,7 @@ const AdminPage = () => {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm(`Delete "${c.name}"?`)) deleteCategory(c.slug);
+                    if (confirm(`Delete "${loc(c.name, "ru")}"?`)) deleteCategory(c.slug);
                   }}
                   className="w-8 h-8 rounded-full bg-background flex items-center justify-center active:scale-90"
                 >
@@ -190,7 +206,7 @@ const AdminPage = () => {
       <Dialog open={!!editingP} onOpenChange={(o) => !o && setEditingP(null)}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingP?.name ? t("admin.edit") : t("admin.add")}</DialogTitle>
+            <DialogTitle>{loc(editingP?.name, "ru") ? t("admin.edit") : t("admin.add")}</DialogTitle>
           </DialogHeader>
           {editingP && (
             <div className="space-y-3">
@@ -254,17 +270,39 @@ const AdminPage = () => {
               </div>
 
               <div>
-                <Label>{t("admin.name")}</Label>
+                <Label>{t("admin.name")} (RU)</Label>
                 <Input
-                  value={editingP.name}
-                  onChange={(e) => setEditingP({ ...editingP, name: e.target.value })}
+                  value={getLang(editingP.name, "ru")}
+                  onChange={(e) =>
+                    setEditingP({ ...editingP, name: setLang(editingP.name, "ru", e.target.value) })
+                  }
                 />
               </div>
               <div>
-                <Label>{t("admin.description")}</Label>
+                <Label>{t("admin.name")} (EN)</Label>
+                <Input
+                  value={getLang(editingP.name, "en")}
+                  onChange={(e) =>
+                    setEditingP({ ...editingP, name: setLang(editingP.name, "en", e.target.value) })
+                  }
+                />
+              </div>
+              <div>
+                <Label>{t("admin.description")} (RU)</Label>
                 <Textarea
-                  value={editingP.description}
-                  onChange={(e) => setEditingP({ ...editingP, description: e.target.value })}
+                  value={getLang(editingP.description, "ru")}
+                  onChange={(e) =>
+                    setEditingP({ ...editingP, description: setLang(editingP.description, "ru", e.target.value) })
+                  }
+                />
+              </div>
+              <div>
+                <Label>{t("admin.description")} (EN)</Label>
+                <Textarea
+                  value={getLang(editingP.description, "en")}
+                  onChange={(e) =>
+                    setEditingP({ ...editingP, description: setLang(editingP.description, "en", e.target.value) })
+                  }
                 />
               </div>
 
@@ -322,14 +360,29 @@ const AdminPage = () => {
                     onChange={(e) => setEditingP({ ...editingP, weight: e.target.value })}
                   />
                 </div>
-                <div>
-                  <Label>{t("admin.badge")}</Label>
-                  <Input
-                    value={editingP.badge ?? ""}
-                    onChange={(e) =>
-                      setEditingP({ ...editingP, badge: e.target.value || undefined })
-                    }
-                  />
+                <div className="col-span-2 grid grid-cols-2 gap-2">
+                  <div>
+                    <Label>{t("admin.badge")} (RU)</Label>
+                    <Input
+                      value={getLang(editingP.badge, "ru")}
+                      onChange={(e) => {
+                        const v = setLang(editingP.badge, "ru", e.target.value);
+                        const empty = !getLang(v, "ru") && !getLang(v, "en");
+                        setEditingP({ ...editingP, badge: empty ? undefined : v });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>{t("admin.badge")} (EN)</Label>
+                    <Input
+                      value={getLang(editingP.badge, "en")}
+                      onChange={(e) => {
+                        const v = setLang(editingP.badge, "en", e.target.value);
+                        const empty = !getLang(v, "ru") && !getLang(v, "en");
+                        setEditingP({ ...editingP, badge: empty ? undefined : v });
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -343,7 +396,7 @@ const AdminPage = () => {
                   <SelectContent>
                     {categories.map((c) => (
                       <SelectItem key={c.slug} value={c.slug}>
-                        {c.emoji} {c.name}
+                        {c.emoji} {loc(c.name, "ru")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -408,7 +461,7 @@ const AdminPage = () => {
       <Dialog open={!!editingC} onOpenChange={(o) => !o && setEditingC(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingC?.name ? t("admin.edit") : t("admin.add")}</DialogTitle>
+            <DialogTitle>{loc(editingC?.name, "ru") ? t("admin.edit") : t("admin.add")}</DialogTitle>
           </DialogHeader>
           {editingC && (
             <div className="space-y-3">
@@ -420,10 +473,21 @@ const AdminPage = () => {
                 />
               </div>
               <div>
-                <Label>{t("admin.name")}</Label>
+                <Label>{t("admin.name")} (RU)</Label>
                 <Input
-                  value={editingC.name}
-                  onChange={(e) => setEditingC({ ...editingC, name: e.target.value })}
+                  value={getLang(editingC.name, "ru")}
+                  onChange={(e) =>
+                    setEditingC({ ...editingC, name: setLang(editingC.name, "ru", e.target.value) })
+                  }
+                />
+              </div>
+              <div>
+                <Label>{t("admin.name")} (EN)</Label>
+                <Input
+                  value={getLang(editingC.name, "en")}
+                  onChange={(e) =>
+                    setEditingC({ ...editingC, name: setLang(editingC.name, "en", e.target.value) })
+                  }
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
