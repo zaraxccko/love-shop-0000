@@ -167,11 +167,9 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
               })}
 
               <button
+                ref={deliveryBtnRef}
                 type="button"
-                onClick={() => {
-                  haptic("light");
-                  toggleDelivery();
-                }}
+                onClick={handleToggleDelivery}
                 className={`w-full mt-2 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition-colors ${
                   delivery
                     ? "gradient-primary text-primary-foreground shadow-glow"
