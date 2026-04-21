@@ -75,7 +75,7 @@ export const useCart = create<CartState>()(
         set((state) => {
           const lines = state.lines.filter((l) => lineKey(l) !== key);
           // Если корзина опустела — сбрасываем доставку
-          return lines.length === 0 ? { lines, delivery: false } : { lines };
+          return lines.length === 0 ? { lines, delivery: false, deliveryAddress: "" } : { lines };
         }),
       setQty: (key, qty) =>
         set((state) => ({
@@ -84,7 +84,7 @@ export const useCart = create<CartState>()(
               ? state.lines.filter((l) => lineKey(l) !== key)
               : state.lines.map((l) => (lineKey(l) === key ? { ...l, qty } : l)),
         })),
-      clear: () => set({ lines: [], delivery: false }),
+      clear: () => set({ lines: [], delivery: false, deliveryAddress: "" }),
       totalQty: () => get().lines.reduce((s, l) => s + l.qty, 0),
       subtotalUSD: () =>
         get().lines.reduce(
