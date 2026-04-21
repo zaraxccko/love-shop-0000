@@ -1,8 +1,14 @@
 export type CountrySlug = "thailand" | "vietnam" | "bali" | "kl";
 
+export interface District {
+  slug: string;
+  name: { ru: string; en: string };
+}
+
 export interface City {
   slug: string;
   name: { ru: string; en: string };
+  districts?: District[];
 }
 
 export interface Country {
