@@ -76,13 +76,8 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div>
-          <div className="font-display font-bold text-lg leading-none">
-            {tr("Пополнение баланса", "Top up balance")}
-          </div>
-          <div className="text-[11px] text-muted-foreground mt-1">
-            {tr("Текущий баланс", "Current balance")}: <span className="text-foreground font-semibold">{formatTHB(balance)}</span>
-          </div>
+        <div className="font-display font-bold text-lg">
+          {tr("Пополнение баланса", "Top up balance")}
         </div>
       </header>
 
@@ -91,12 +86,9 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
           <>
             {suggested && suggested > 0 && (
               <div className="rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
-                {tr(
-                  `Для оформления заказа не хватает `,
-                  `You need to add `
-                )}
+                {tr("Для оформления заказа не хватает ", "You need to add ")}
                 <span className="font-bold text-primary">{formatTHB(suggested)}</span>
-                {tr(" — сумма уже подставлена ниже.", " more — amount prefilled below.")}
+                {tr(".", " more.")}
               </div>
             )}
 
