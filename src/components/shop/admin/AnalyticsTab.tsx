@@ -82,8 +82,8 @@ export const AnalyticsTab = () => {
       <div className="grid grid-cols-2 gap-2">
         <KPI icon={Users} label="Юзеров" value={a.totals.users.toLocaleString("ru")} hint="всего" />
         <KPI icon={Activity} label="Активаций" value={a.totals.activations.toLocaleString("ru")} hint="/start всего" />
-        <KPI icon={Users} label="DAU" value={a.totals.dau.toString()} hint="за сегодня" />
-        <KPI icon={Users} label="MAU" value={a.totals.mau.toLocaleString("ru")} hint="за месяц" />
+        <KPI icon={Users} label="Активных за день" value={a.totals.dau.toString()} hint="за сегодня" />
+        <KPI icon={Users} label="Активных за месяц" value={a.totals.mau.toLocaleString("ru")} hint="за месяц" />
         <KPI icon={DollarSign} label="GMV" value={`$${a.totals.gmvUSD.toLocaleString("ru")}`} hint="за всё время" />
         <KPI icon={ShoppingBag} label="Заказов" value={a.totals.ordersToday.toString()} hint="сегодня" />
       </div>
@@ -108,7 +108,7 @@ export const AnalyticsTab = () => {
 
       <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
         <div className="font-bold text-sm flex items-center gap-1.5">
-          <Users className="w-4 h-4 text-primary" /> DAU (7д)
+          <Users className="w-4 h-4 text-primary" /> Активные пользователи в день (7д)
         </div>
         <Sparkline data={a.dau7d} />
         <div className="flex justify-between text-[10px] text-muted-foreground">
