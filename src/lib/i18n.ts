@@ -56,6 +56,12 @@ const dict = {
     "admin.noCategories": "Категорий пока нет",
     "admin.slug": "Slug (id)",
     "admin.openAdmin": "Открыть админку",
+    "admin.authTitle": "Вход в админку",
+    "admin.authSubtitle": "Введите пароль или войдите через Telegram",
+    "admin.password": "Пароль",
+    "admin.login": "Войти",
+    "admin.logout": "Выйти",
+    "admin.wrongPassword": "Неверный пароль",
   },
   en: {
     "splash.title": "Welcome",
@@ -109,6 +115,12 @@ const dict = {
     "admin.noCategories": "No categories yet",
     "admin.slug": "Slug (id)",
     "admin.openAdmin": "Open admin",
+    "admin.authTitle": "Admin login",
+    "admin.authSubtitle": "Enter password or sign in via Telegram",
+    "admin.password": "Password",
+    "admin.login": "Sign in",
+    "admin.logout": "Sign out",
+    "admin.wrongPassword": "Wrong password",
   },
 } as const;
 
