@@ -245,11 +245,8 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                 Районы города
               </div>
               {activeCity.districts.map((d) => {
-                const items = visibleProducts.filter(
-                  (p) =>
-                    !p.districts ||
-                    p.districts.length === 0 ||
-                    p.districts.includes(d.slug)
+                const items = visibleProducts.filter((p) =>
+                  p.districts?.includes(d.slug)
                 );
                 return (
                   <div key={d.slug} className="border-t pt-2 first:border-t-0 first:pt-0">
