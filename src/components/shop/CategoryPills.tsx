@@ -1,0 +1,37 @@
+import { CATEGORIES } from "@/data/mockProducts";
+import type { CategorySlug } from "@/types/shop";
+import { haptic } from "@/lib/telegram";
+import { cn } from "@/lib/utils";
+
+interface CategoryPillsProps {
+  active: CategorySlug;
+  onChange: (slug: CategorySlug) => void;
+}
+
+export const CategoryPills = ({ active, onChange }: CategoryPillsProps) => {
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-3 px-5 no-scrollbar -mx-0">
+      {CATEGORIES.map((c) => {
+        const isActive = c.slug === active;
+        return (
+          <button
+            key={c.slug}
+            onClick={() => {
+              haptic("light");
+              onChange(c.slug);
+            }}
+            className={cn(
+              "shrink-0 px-4 py-2.5 rounded-full text-[13px] font-semibold whitespace-nowrap transition-[var(--transition-base)] flex items-center gap-1.5 active:scale-95",
+              isActive
+                ? "gradient-primary text-primary-foreground shadow-glow"
+                : "bg-card text-foreground shadow-card"
+            )}
+          >
+            <span className="text-base">{c.emoji}</span>
+            {c.name}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
