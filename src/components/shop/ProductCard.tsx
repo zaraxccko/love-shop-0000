@@ -60,7 +60,3 @@ export const ProductCard = ({ product, onOpen }: ProductCardProps) => {
     </div>
   );
 };
-      </div>
-    </div>
-  );
-};
