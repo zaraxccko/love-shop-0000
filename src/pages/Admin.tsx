@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Pencil, Plus, RotateCcw, Eye } from "lucide-react";
+import { Trash2, Pencil, Plus, RotateCcw, Eye, ChevronLeft, MapPin } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import { useCatalog } from "@/store/catalog";
 import { useT } from "@/lib/i18n";
@@ -91,25 +91,130 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
 
   const [editingP, setEditingP] = useState<Product | null>(null);
   const [editingC, setEditingC] = useState<Category | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
   const allCities = COUNTRIES.flatMap((c) => c.cities.map((city) => ({ ...city, country: c })));
+  const activeCountry = COUNTRIES.find((c) => c.slug === selectedCountry);
+  const activeCity = allCities.find((c) => c.slug === selectedCity);
+
+  // Geo picker — country first
+  if (!selectedCountry) {
+    return (
+      <div className="min-h-screen max-w-md mx-auto bg-background px-5 pt-6 pb-10">
+        <header className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => onExit?.()}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground active:scale-95"
+          >
+            <Eye className="w-4 h-4" /> {t("admin.viewShop")}
+          </button>
+          <h1 className="font-display font-bold text-base">{t("admin.title")}</h1>
+          <span className="w-10" />
+        </header>
+        <h2 className="font-display font-extrabold text-2xl flex items-center gap-2">
+          <MapPin className="w-5 h-5" /> Выберите страну
+        </h2>
+        <p className="text-muted-foreground text-sm mt-1 mb-6">
+          Сначала выберите гео, затем настраивайте товары для него
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {COUNTRIES.map((c) => (
+            <button
+              key={c.slug}
+              onClick={() => {
+                if (c.cities.length === 1) {
+                  setSelectedCountry(c.slug);
+                  setSelectedCity(c.cities[0].slug);
+                } else {
+                  setSelectedCountry(c.slug);
+                }
+              }}
+              className="bg-card rounded-3xl p-4 shadow-card active:scale-95 transition-[var(--transition-base)] text-left flex flex-col items-start gap-2"
+            >
+              <span className="text-4xl">{c.flag}</span>
+              <span className="font-bold text-sm leading-tight">{c.name.ru}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {products.filter((p) =>
+                  c.cities.some((ct) => p.cities?.includes(ct.slug))
+                ).length}{" "}
+                товаров
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // City picker (when country has multiple cities)
+  if (activeCountry && !selectedCity) {
+    return (
+      <div className="min-h-screen max-w-md mx-auto bg-background px-5 pt-6 pb-10">
+        <header className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => setSelectedCountry(null)}
+            className="w-10 h-10 rounded-2xl bg-card shadow-card flex items-center justify-center active:scale-95"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-display font-bold text-base flex-1 text-center">
+            {activeCountry.flag} {activeCountry.shortName?.ru ?? activeCountry.name.ru}
+          </h1>
+          <span className="w-10" />
+        </header>
+        <h2 className="font-display font-extrabold text-2xl">Выберите город</h2>
+        <div className="space-y-2 mt-6">
+          {activeCountry.cities.map((city) => (
+            <button
+              key={city.slug}
+              onClick={() => setSelectedCity(city.slug)}
+              className="w-full bg-card rounded-2xl p-4 shadow-card active:scale-[0.98] flex items-center justify-between"
+            >
+              <span className="font-bold">{city.name.ru}</span>
+              <span className="text-xs text-muted-foreground">
+                {products.filter((p) => p.cities?.includes(city.slug)).length} товаров
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Filter to products available in the active city
+  const visibleProducts = activeCity
+    ? products.filter((p) => p.cities?.includes(activeCity.slug))
+    : products;
 
   return (
     <div className="min-h-screen max-w-md mx-auto bg-background pb-10">
-      <header className="sticky top-0 z-10 bg-background/90 backdrop-blur px-5 pt-5 pb-3 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-background/90 backdrop-blur px-5 pt-5 pb-3 flex items-center justify-between gap-2">
         <button
-          onClick={() => onExit?.()}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground active:scale-95"
-          title="View shop"
+          onClick={() => {
+            // Back to city picker (if country has multiple cities) or country picker
+            if (activeCountry && activeCountry.cities.length > 1) setSelectedCity(null);
+            else {
+              setSelectedCity(null);
+              setSelectedCountry(null);
+            }
+          }}
+          className="w-9 h-9 rounded-2xl bg-card shadow-card flex items-center justify-center active:scale-95 shrink-0"
+          aria-label="Back"
         >
-          <Eye className="w-4 h-4" /> {t("admin.viewShop")}
+          <ChevronLeft className="w-4 h-4" />
         </button>
-        <h1 className="font-display font-bold text-base">{t("admin.title")}</h1>
+        <div className="flex-1 text-center min-w-0">
+          <h1 className="font-display font-bold text-sm truncate">{t("admin.title")}</h1>
+          <div className="text-[11px] text-muted-foreground truncate">
+            {activeCountry?.flag} {activeCity?.name.ru}
+          </div>
+        </div>
         <button
           onClick={() => {
             if (confirm("Reset to samples?")) reset();
           }}
-          className="text-muted-foreground active:scale-95"
+          className="w-9 h-9 rounded-2xl bg-card shadow-card flex items-center justify-center text-muted-foreground active:scale-95 shrink-0"
           aria-label="reset"
         >
           <RotateCcw className="w-4 h-4" />
@@ -123,16 +228,23 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
         </TabsList>
 
         <TabsContent value="products" className="space-y-3 mt-4">
-          <Button onClick={() => setEditingP(blankProduct())} className="w-full gradient-primary">
+          <Button
+            onClick={() => {
+              const p = blankProduct();
+              if (activeCity) p.cities = [activeCity.slug];
+              setEditingP(p);
+            }}
+            className="w-full gradient-primary"
+          >
             <Plus className="w-4 h-4 mr-1" /> {t("admin.add")}
           </Button>
 
-          {products.length === 0 ? (
+          {visibleProducts.length === 0 ? (
             <div className="py-10 text-center text-muted-foreground text-sm">
               {t("admin.noProducts")}
             </div>
           ) : (
-            products.map((p) => (
+            visibleProducts.map((p) => (
               <div key={p.id} className="bg-card rounded-2xl p-3 flex items-center gap-3 shadow-card">
                 <div
                   className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${!p.imageUrl ? p.gradient : ""}`}
