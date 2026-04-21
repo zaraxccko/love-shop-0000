@@ -83,7 +83,7 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
                       </div>
                       {line.districtSlug && (
                         <div className="text-[11px] text-muted-foreground mt-0.5">
-                          📍 {city?.districts?.find((d) => d.slug === line.districtSlug)?.name[lang] ?? line.districtSlug}
+                          📍 {findDistrict(line.districtSlug)?.name[lang] ?? line.districtSlug}
                         </div>
                       )}
                       {isGift ? (
