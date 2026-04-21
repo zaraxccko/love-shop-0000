@@ -565,7 +565,7 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                   <div>
                     <Label>Районы</Label>
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      Если ничего не выбрано — товар доступен во всех районах выбранных городов.
+                      Отметьте районы, где доступен товар. Если не выбрать ни одного — товар не будет показан ни в одном районе.
                     </p>
                     <div className="space-y-3 mt-2">
                       {cityWithDistricts.map((city) => (
