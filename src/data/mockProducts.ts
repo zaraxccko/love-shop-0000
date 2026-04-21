@@ -1,4 +1,5 @@
-import type { Category, Product } from "@/types/shop";
+import type { Category, Product, ProductVariant } from "@/types/shop";
+import { COUNTRIES } from "./locations";
 
 export const CATEGORIES: Category[] = [
   { slug: "gummies", name: { ru: "Жевательное", en: "Gummies" }, emoji: "🍬", gradient: "gradient-grape" },
@@ -8,8 +9,65 @@ export const CATEGORIES: Category[] = [
   { slug: "vapes", name: { ru: "Вейпы", en: "Vapes" }, emoji: "💨", gradient: "gradient-grape" },
 ];
 
+/**
+ * Build demo variants for a product available in the given cities.
+ * - Variants: 1g/2g/5g
+ * - Price scales by grams; differs per country
+ * - Each variant available in the first 2 districts of each listed city
+ */
+const buildDemoVariants = (cities: string[], basePrice: number): ProductVariant[] => {
+  const countryPriceFactor: Record<string, number> = {
+    thailand: 1,
+    vietnam: 0.85,
+    bali: 1.1,
+    kl: 1.2,
+  };
+
+  // Map cities → countries that contain at least one of those cities
+  const countriesUsed = new Set<string>();
+  const districtsByCity = new Map<string, string[]>();
+  for (const country of COUNTRIES) {
+    for (const city of country.cities) {
+      if (!cities.includes(city.slug)) continue;
+      countriesUsed.add(country.slug);
+      const ds = (city.districts ?? []).slice(0, 2).map((d) => d.slug);
+      // Cities without districts can still receive variants (no district filter applied)
+      districtsByCity.set(city.slug, ds);
+    }
+  }
+
+  const allDistricts = Array.from(districtsByCity.values()).flat();
+
+  const grams = [1, 2, 5];
+  return grams.map((g, idx) => {
+    const pricesByCountry: Record<string, number> = {};
+    for (const c of countriesUsed) {
+      const factor = countryPriceFactor[c] ?? 1;
+      // Slight bulk discount per gram
+      pricesByCountry[c] = Math.round(basePrice * g * factor * (1 - idx * 0.05));
+    }
+    return {
+      id: `${g}g`,
+      grams: g,
+      pricesByCountry,
+      // Smaller pack available everywhere; bigger pack only first district per city
+      districts:
+        g === 1
+          ? allDistricts
+          : Array.from(districtsByCity.values())
+              .map((ds) => ds[0])
+              .filter(Boolean),
+    };
+  });
+};
+
+const make = (p: Omit<Product, "variants"> & { basePrice?: number }): Product => ({
+  ...p,
+  variants: buildDemoVariants(p.cities ?? [], p.basePrice ?? 10),
+});
+
 export const PRODUCTS: Product[] = [
-  {
+  make({
     id: "p1",
     name: { ru: "Mango Sticky Rice Gummies", en: "Mango Sticky Rice Gummies" },
     description: {
@@ -18,7 +76,6 @@ export const PRODUCTS: Product[] = [
     },
     category: "gummies",
     priceTHB: 450,
-    thcMg: 25,
     weight: "10 шт",
     inStock: 24,
     gradient: "gradient-mango",
@@ -26,8 +83,9 @@ export const PRODUCTS: Product[] = [
     featured: true,
     badge: { ru: "Хит", en: "Hit" },
     cities: ["phuket", "bangkok", "pattaya", "samui"],
-  },
-  {
+    basePrice: 12,
+  }),
+  make({
     id: "p2",
     name: { ru: "Strawberry Cloud Gummies", en: "Strawberry Cloud Gummies" },
     description: {
@@ -36,14 +94,14 @@ export const PRODUCTS: Product[] = [
     },
     category: "gummies",
     priceTHB: 420,
-    thcMg: 20,
     weight: "10 шт",
     inStock: 18,
     gradient: "gradient-grape",
     emoji: "🍓",
     cities: ["phuket", "bangkok", "bali"],
-  },
-  {
+    basePrice: 11,
+  }),
+  make({
     id: "p3",
     name: { ru: "Dark Chocolate Bar", en: "Dark Chocolate Bar" },
     description: {
@@ -52,14 +110,14 @@ export const PRODUCTS: Product[] = [
     },
     category: "chocolate",
     priceTHB: 320,
-    thcMg: 10,
     weight: "50 г",
     inStock: 30,
     gradient: "gradient-mango",
     emoji: "🍫",
     cities: ["phuket", "bangkok", "pattaya", "samui", "bali", "kl"],
-  },
-  {
+    basePrice: 9,
+  }),
+  make({
     id: "p4",
     name: { ru: "Coconut Choco Bites", en: "Coconut Choco Bites" },
     description: {
@@ -68,15 +126,15 @@ export const PRODUCTS: Product[] = [
     },
     category: "chocolate",
     priceTHB: 380,
-    thcMg: 15,
     weight: "8 шт",
     inStock: 12,
     gradient: "gradient-mint",
     emoji: "🥥",
     badge: { ru: "Новинка", en: "New" },
     cities: ["bali", "phuket"],
-  },
-  {
+    basePrice: 10,
+  }),
+  make({
     id: "p5",
     name: { ru: "Pineapple Cookies", en: "Pineapple Cookies" },
     description: {
@@ -85,14 +143,14 @@ export const PRODUCTS: Product[] = [
     },
     category: "cookies",
     priceTHB: 290,
-    thcMg: 10,
     weight: "6 шт",
     inStock: 20,
     gradient: "gradient-mango",
     emoji: "🍍",
     cities: ["bangkok", "phuket", "samui"],
-  },
-  {
+    basePrice: 8,
+  }),
+  make({
     id: "p6",
     name: { ru: "Lychee Iced Tea", en: "Lychee Iced Tea" },
     description: {
@@ -101,14 +159,14 @@ export const PRODUCTS: Product[] = [
     },
     category: "drinks",
     priceTHB: 250,
-    thcMg: 5,
     weight: "330 мл",
     inStock: 15,
     gradient: "gradient-mint",
     emoji: "🧋",
     cities: ["hochiminh", "danang", "nhatrang", "bangkok"],
-  },
-  {
+    basePrice: 7,
+  }),
+  make({
     id: "p7",
     name: { ru: "Mint Mojito Vape", en: "Mint Mojito Vape" },
     description: {
@@ -117,14 +175,14 @@ export const PRODUCTS: Product[] = [
     },
     category: "vapes",
     priceTHB: 850,
-    thcMg: 500,
     weight: "1 мл",
     inStock: 8,
     gradient: "gradient-mint",
     emoji: "💨",
     cities: ["phuket", "bangkok", "pattaya", "kl"],
-  },
-  {
+    basePrice: 25,
+  }),
+  make({
     id: "p8",
     name: { ru: "Berry Bliss Cookies", en: "Berry Bliss Cookies" },
     description: {
@@ -133,11 +191,11 @@ export const PRODUCTS: Product[] = [
     },
     category: "cookies",
     priceTHB: 310,
-    cbdMg: 25,
     weight: "6 шт",
     inStock: 14,
     gradient: "gradient-grape",
     emoji: "🫐",
     cities: ["bali", "kl", "hochiminh"],
-  },
+    basePrice: 8,
+  }),
 ];
