@@ -473,10 +473,21 @@ const AdminPage = () => {
                 />
               </div>
               <div>
-                <Label>{t("admin.name")}</Label>
+                <Label>{t("admin.name")} (RU)</Label>
                 <Input
-                  value={editingC.name}
-                  onChange={(e) => setEditingC({ ...editingC, name: e.target.value })}
+                  value={getLang(editingC.name, "ru")}
+                  onChange={(e) =>
+                    setEditingC({ ...editingC, name: setLang(editingC.name, "ru", e.target.value) })
+                  }
+                />
+              </div>
+              <div>
+                <Label>{t("admin.name")} (EN)</Label>
+                <Input
+                  value={getLang(editingC.name, "en")}
+                  onChange={(e) =>
+                    setEditingC({ ...editingC, name: setLang(editingC.name, "en", e.target.value) })
+                  }
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
