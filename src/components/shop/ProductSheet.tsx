@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, MapPin, Package, Plus, X } from "lucide-react";
+import { ChevronLeft, MapPin, Package, Plus, Truck, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import type { Product, StashType } from "@/types/shop";
 import { STASH_TYPES } from "@/types/shop";
-import { useCart } from "@/store/cart";
+import { useCart, DELIVERY_FEE_USD } from "@/store/cart";
 import { useLocation } from "@/store/location";
 import { useI18n } from "@/lib/i18n";
 import { loc } from "@/lib/loc";
