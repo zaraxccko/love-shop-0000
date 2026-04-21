@@ -12,7 +12,13 @@ export const CRYPTO_LIST: { code: CryptoCode; name: string; network: string; add
   { code: "TON",  name: "Toncoin", network: "TON",    address: "UQAexampleTONaddressxxxxxxxxxxxxxx" },
 ];
 
-export type DepositStatus = "pending" | "confirmed" | "cancelled";
+/**
+ * pending     — заявка создана, юзер ещё не нажал "Я оплатил"
+ * awaiting    — юзер заявил об оплате, ждём подтверждения админа
+ * confirmed   — админ подтвердил, баланс пополнен
+ * cancelled   — отменено
+ */
+export type DepositStatus = "pending" | "awaiting" | "confirmed" | "cancelled";
 
 export interface Deposit {
   id: string;
@@ -21,6 +27,7 @@ export interface Deposit {
   crypto: CryptoCode;
   address: string;
   status: DepositStatus;
+  paidAt?: string;
   confirmedAt?: string;
 }
 
@@ -42,6 +49,9 @@ interface AccountState {
   orders: OrderRecord[];
 
   createDeposit: (amountUSD: number, crypto: CryptoCode) => Deposit;
+  /** Юзер сообщил, что оплатил — депозит уходит на подтверждение админа. */
+  markPaid: (id: string) => void;
+  /** Админ подтверждает оплату — баланс пополняется. */
   confirmDeposit: (id: string) => void;
   cancelDeposit: (id: string) => void;
 
@@ -73,10 +83,19 @@ export const useAccount = create<AccountState>()(
         return dep;
       },
 
+      markPaid: (id) =>
+        set((s) => ({
+          deposits: s.deposits.map((d) =>
+            d.id === id && d.status === "pending"
+              ? { ...d, status: "awaiting", paidAt: new Date().toISOString() }
+              : d
+          ),
+        })),
+
       confirmDeposit: (id) =>
         set((s) => {
           const dep = s.deposits.find((d) => d.id === id);
-          if (!dep || dep.status !== "pending") return s;
+          if (!dep || (dep.status !== "awaiting" && dep.status !== "pending")) return s;
           return {
             deposits: s.deposits.map((d) =>
               d.id === id ? { ...d, status: "confirmed", confirmedAt: new Date().toISOString() } : d
@@ -88,7 +107,9 @@ export const useAccount = create<AccountState>()(
       cancelDeposit: (id) =>
         set((s) => ({
           deposits: s.deposits.map((d) =>
-            d.id === id && d.status === "pending" ? { ...d, status: "cancelled" } : d
+            d.id === id && (d.status === "pending" || d.status === "awaiting")
+              ? { ...d, status: "cancelled" }
+              : d
           ),
         })),
 
