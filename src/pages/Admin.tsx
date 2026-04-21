@@ -227,7 +227,10 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
         <TabsList className="w-full">
           <TabsTrigger value="products" className="flex-1">{t("admin.products")}</TabsTrigger>
           <TabsTrigger value="categories" className="flex-1">{t("admin.categories")}</TabsTrigger>
+          <TabsTrigger value="deposits" className="flex-1">Пополнения</TabsTrigger>
         </TabsList>
+
+        <DepositsTab />
 
         <TabsContent value="products" className="space-y-3 mt-4">
           <Button
