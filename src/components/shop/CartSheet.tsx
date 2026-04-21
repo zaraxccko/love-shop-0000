@@ -5,6 +5,8 @@ import { formatTHB } from "@/lib/format";
 import { haptic } from "@/lib/telegram";
 import { useI18n, useT } from "@/lib/i18n";
 import { loc } from "@/lib/loc";
+import { useLocation } from "@/store/location";
+import { findCity } from "@/data/locations";
 
 interface CartSheetProps {
   open: boolean;
@@ -30,6 +32,8 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
   const total = useCart((s) => s.totalTHB());
   const t = useT();
   const lang = useI18n((s) => s.lang) ?? "ru";
+  const citySlug = useLocation((s) => s.city);
+  const city = citySlug ? findCity(citySlug)?.city : null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -78,6 +82,11 @@ export const CartSheet = ({ open, onOpenChange, onCheckout }: CartSheetProps) =>
                         {loc(line.product.name, lang)}
                         <span className="text-muted-foreground font-normal">{variantLabel}</span>
                       </div>
+                      {line.districtSlug && (
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
+                          📍 {city?.districts?.find((d) => d.slug === line.districtSlug)?.name[lang] ?? line.districtSlug}
+                        </div>
+                      )}
                       {isGift ? (
                         <div className="text-primary font-bold text-xs mt-1 uppercase tracking-wide">
                           {lang === "ru" ? `Подарок × ${line.qty}` : `Gift × ${line.qty}`}
