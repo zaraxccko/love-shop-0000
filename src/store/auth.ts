@@ -57,7 +57,7 @@ export const useAuth = create<AuthState>()(
         if (state.lockedUntil && state.lockedUntil <= now) {
           set({ lockedUntil: null, failedAttempts: 0 });
         }
-        if (pwd && pwd === ENV_PASSWORD) {
+        if (pwd && pwd === ADMIN_PASSWORD) {
           set({ isAdmin: true, failedAttempts: 0, lockedUntil: null });
           return { ok: true, locked: false, remaining: 0 };
         }
