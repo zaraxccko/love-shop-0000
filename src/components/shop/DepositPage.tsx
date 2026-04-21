@@ -186,8 +186,8 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-muted-foreground">{tr("Способ", "Method")}</div>
-                  <div className="font-bold">{cryptoMeta.code}</div>
-                  <div className="text-[11px] text-muted-foreground">{cryptoMeta.network}</div>
+                  <div className="font-bold">{cryptoMeta.name}</div>
+                  <div className="text-[11px] text-muted-foreground">{tr("Сеть", "Network")}: {cryptoMeta.network}</div>
                 </div>
               </div>
             </div>
