@@ -15,6 +15,7 @@ interface LocationPickerProps {
 export const LocationPicker = ({ onPicked, showBack, onBack }: LocationPickerProps) => {
   const t = useT();
   const lang = useI18n((s) => s.lang) ?? "ru";
+  const setLang = useI18n((s) => s.setLang);
   const setCity = useLocation((s) => s.setCity);
   const [country, setCountry] = useState<Country | null>(null);
 
