@@ -237,8 +237,8 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
                     <span className="text-primary font-bold">⚠️</span>
                     <span>
                       {tr(
-                        `Отправляйте только ${cryptoMeta.name} в сети ${cryptoMeta.network}. Если выберете другую сеть — монеты потеряются.`,
-                        `Send only ${cryptoMeta.name} on the ${cryptoMeta.network} network. Using a different network will result in lost funds.`
+                        `Отправляйте только ${cryptoMeta.name} в сети ${cryptoMeta.network}.`,
+                        `Send only ${cryptoMeta.name} on the ${cryptoMeta.network} network.`
                       )}
                     </span>
                   </div>
@@ -246,20 +246,12 @@ export const DepositPage = ({ onBack, suggested }: DepositPageProps) => {
                     <span className="text-primary font-bold">💸</span>
                     <span>
                       {tr(
-                        "Сеть берёт небольшую комиссию за перевод — учтите её, чтобы дошла нужная сумма.",
-                        "The network charges a small fee for the transfer — keep that in mind so the full amount arrives."
+                        "Учитывайте комиссию сети при переводе.",
+                        "Mind the network fee when sending."
                       )}
                     </span>
                   </div>
-                  <div className="flex gap-2 items-start">
-                    <span className="text-primary font-bold">✅</span>
-                    <span>
-                      {tr(
-                        "После оплаты нажмите кнопку ниже — заявка уйдёт админу на подтверждение.",
-                        "After paying, tap the button below — your request will be sent to the admin for confirmation."
-                      )}
-                    </span>
-                  </div>
+                </div>
                 </div>
 
                 <button
