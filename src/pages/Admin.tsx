@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Pencil, Plus, RotateCcw, Eye } from "lucide-react";
+import { Trash2, Pencil, Plus, RotateCcw, Eye, ChevronLeft, MapPin } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import { useCatalog } from "@/store/catalog";
 import { useT } from "@/lib/i18n";
