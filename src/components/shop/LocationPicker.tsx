@@ -15,6 +15,7 @@ interface LocationPickerProps {
 export const LocationPicker = ({ onPicked, showBack, onBack }: LocationPickerProps) => {
   const t = useT();
   const lang = useI18n((s) => s.lang) ?? "ru";
+  const setLang = useI18n((s) => s.setLang);
   const setCity = useLocation((s) => s.setCity);
   const [country, setCountry] = useState<Country | null>(null);
 
@@ -84,6 +85,18 @@ export const LocationPicker = ({ onPicked, showBack, onBack }: LocationPickerPro
             </button>
           ))}
         </div>
+      )}
+
+      {!country && (
+        <button
+          onClick={() => {
+            haptic("light");
+            setLang(null);
+          }}
+          className="mt-8 mx-auto text-xs text-muted-foreground underline-offset-4 hover:underline active:scale-95"
+        >
+          {lang === "ru" ? "← Сменить язык" : "← Change language"}
+        </button>
       )}
     </div>
   );
