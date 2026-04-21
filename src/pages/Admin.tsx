@@ -514,6 +514,59 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                   })}
                 </div>
               </div>
+
+              {(() => {
+                const selectedCities = allCities.filter((c) =>
+                  editingP.cities?.includes(c.slug)
+                );
+                const cityWithDistricts = selectedCities.filter(
+                  (c) => c.districts && c.districts.length > 0
+                );
+                if (cityWithDistricts.length === 0) return null;
+                return (
+                  <div>
+                    <Label>Районы</Label>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Если ничего не выбрано — товар доступен во всех районах выбранных городов.
+                    </p>
+                    <div className="space-y-3 mt-2">
+                      {cityWithDistricts.map((city) => (
+                        <div key={city.slug}>
+                          <div className="text-xs font-semibold mb-1">
+                            {city.country.flag} {city.name.ru}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {city.districts!.map((d) => {
+                              const checked =
+                                editingP.districts?.includes(d.slug) ?? false;
+                              return (
+                                <label
+                                  key={d.slug}
+                                  className="flex items-center gap-2 bg-muted rounded-lg p-2 text-xs"
+                                >
+                                  <Checkbox
+                                    checked={checked}
+                                    onCheckedChange={(v) => {
+                                      const set = new Set(editingP.districts ?? []);
+                                      if (v) set.add(d.slug);
+                                      else set.delete(d.slug);
+                                      setEditingP({
+                                        ...editingP,
+                                        districts: Array.from(set),
+                                      });
+                                    }}
+                                  />
+                                  {d.name.ru}
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
           <DialogFooter className="flex-row gap-2">
