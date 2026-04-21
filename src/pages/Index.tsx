@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+
 import { Header } from "@/components/shop/Header";
 import { Hero } from "@/components/shop/Hero";
 import { CategoryPills } from "@/components/shop/CategoryPills";
