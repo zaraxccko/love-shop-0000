@@ -605,6 +605,181 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                   </div>
                 );
               })()}
+
+              {/* Variants editor (grams + price by country + districts) */}
+              {(() => {
+                const variants = editingP.variants ?? [];
+                const updateVariants = (v: typeof variants) =>
+                  setEditingP({ ...editingP, variants: v });
+
+                const selectedCountries = COUNTRIES.filter((co) =>
+                  co.cities.some((ci) => editingP.cities?.includes(ci.slug))
+                );
+                const selectedCitiesWithDistricts = allCities.filter(
+                  (c) =>
+                    editingP.cities?.includes(c.slug) &&
+                    c.districts &&
+                    c.districts.length > 0
+                );
+
+                const PRESETS = [1, 2, 5, 10];
+                const usedGrams = new Set(variants.map((v) => v.grams));
+
+                return (
+                  <div className="border-t pt-4">
+                    <Label>Варианты (фасовки)</Label>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Граммовки с ценой по странам и доступностью по районам.
+                    </p>
+
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {PRESETS.filter((g) => !usedGrams.has(g)).map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() =>
+                            updateVariants([
+                              ...variants,
+                              { id: `${g}g`, grams: g, pricesByCountry: {} },
+                            ])
+                          }
+                          className="text-xs bg-muted rounded-full px-2 py-1 active:scale-95"
+                        >
+                          + {g}г
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const raw = prompt("Сколько грамм?");
+                          const g = Number(raw);
+                          if (!g || g <= 0 || usedGrams.has(g)) return;
+                          updateVariants([
+                            ...variants,
+                            { id: `${g}g`, grams: g, pricesByCountry: {} },
+                          ]);
+                        }}
+                        className="text-xs bg-muted rounded-full px-2 py-1 active:scale-95"
+                      >
+                        + другое
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 mt-3">
+                      {variants.length === 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Пока нет вариантов.
+                        </div>
+                      )}
+                      {variants
+                        .slice()
+                        .sort((a, b) => a.grams - b.grams)
+                        .map((variant) => (
+                          <div
+                            key={variant.id}
+                            className="bg-muted/50 rounded-xl p-3 space-y-2"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="font-bold text-sm">{variant.grams}г</div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateVariants(variants.filter((v) => v.id !== variant.id))
+                                }
+                                className="w-7 h-7 rounded-full bg-background flex items-center justify-center active:scale-90"
+                                aria-label="Удалить вариант"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                              </button>
+                            </div>
+
+                            {selectedCountries.length === 0 ? (
+                              <div className="text-[11px] text-muted-foreground">
+                                Сначала выберите города выше.
+                              </div>
+                            ) : (
+                              <div>
+                                <div className="text-[11px] text-muted-foreground mb-1">
+                                  Цена по странам ($)
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {selectedCountries.map((co) => (
+                                    <label key={co.slug} className="flex items-center gap-2 text-xs">
+                                      <span className="w-14 shrink-0">
+                                        {co.flag} {co.shortName?.ru ?? co.name.ru}
+                                      </span>
+                                      <Input
+                                        type="number"
+                                        className="h-8"
+                                        value={variant.pricesByCountry[co.slug] ?? ""}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          const next = { ...variant.pricesByCountry };
+                                          if (val === "") delete next[co.slug];
+                                          else next[co.slug] = Number(val) || 0;
+                                          updateVariants(
+                                            variants.map((v) =>
+                                              v.id === variant.id
+                                                ? { ...v, pricesByCountry: next }
+                                                : v
+                                            )
+                                          );
+                                        }}
+                                      />
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {selectedCitiesWithDistricts.length > 0 && (
+                              <div>
+                                <div className="text-[11px] text-muted-foreground mb-1">
+                                  Доступен в районах (пусто = во всех)
+                                </div>
+                                <div className="space-y-1.5">
+                                  {selectedCitiesWithDistricts.map((city) => (
+                                    <div key={city.slug}>
+                                      <div className="text-[11px] font-semibold">
+                                        {city.country.flag} {city.name.ru}
+                                      </div>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {city.districts!.map((d) => {
+                                          const checked = variant.districts?.includes(d.slug) ?? false;
+                                          return (
+                                            <button
+                                              key={d.slug}
+                                              type="button"
+                                              onClick={() => {
+                                                const set = new Set(variant.districts ?? []);
+                                                if (checked) set.delete(d.slug);
+                                                else set.add(d.slug);
+                                                updateVariants(
+                                                  variants.map((v) =>
+                                                    v.id === variant.id
+                                                      ? { ...v, districts: Array.from(set) }
+                                                      : v
+                                                  )
+                                                );
+                                              }}
+                                              className={`text-[11px] rounded-full px-2 py-0.5 ${checked ? "gradient-primary text-primary-foreground" : "bg-background text-muted-foreground"}`}
+                                            >
+                                              {d.name.ru}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
           <DialogFooter className="flex-row gap-2">
