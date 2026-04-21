@@ -544,13 +544,6 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
           {editingC && (
             <div className="space-y-3">
               <div>
-                <Label>{t("admin.slug")}</Label>
-                <Input
-                  value={editingC.slug}
-                  onChange={(e) => setEditingC({ ...editingC, slug: e.target.value })}
-                />
-              </div>
-              <div>
                 <Label>{t("admin.name")} (RU)</Label>
                 <Input
                   value={getLang(editingC.name, "ru")}
