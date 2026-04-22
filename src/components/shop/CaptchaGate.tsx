@@ -175,21 +175,9 @@ export const CaptchaGate = () => {
         )}
       </div>
 
-      <button
-        onClick={refresh}
-        disabled={blocked}
-        className="mt-5 w-full bg-card border border-border font-bold py-4 rounded-2xl active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
-      >
-        <RefreshCw className="w-5 h-5" />
-        {tr("Перемешать", "Shuffle")}
-      </button>
-
-      <p className="text-[11px] text-muted-foreground mt-4 max-w-xs">
-        {tr(
-          "Это нужно, чтобы отсечь ботов. Картинки нарисованы на холсте — обычный скрипт их не прочитает.",
-          "This filters out bots. Images are drawn on canvas — scripts can't read them."
-        )}
-      </p>
     </div>
   );
 };
+
+// keep refresh import-safe
+void RefreshCw;
