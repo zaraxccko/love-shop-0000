@@ -21,6 +21,7 @@ import { useCatalog } from "@/store/catalog";
 import { useAuth } from "@/store/auth";
 import { useAccount } from "@/store/account";
 import { useCart } from "@/store/cart";
+import { useSession } from "@/store/session";
 import { findCity } from "@/data/locations";
 import { toast } from "sonner";
 import type { Product } from "@/types/shop";
@@ -33,22 +34,29 @@ const Index = () => {
   const products = useCatalog((s) => s.products);
   const categories = useCatalog((s) => s.categories);
 
-  const { user } = useTelegram();
-  const { isAdmin, loginWithTelegram, logout } = useAuth();
+  const { user, tg } = useTelegram();
+  const { isAdmin } = useAuth();
+  const loginWithInitData = useSession((s) => s.loginWithInitData);
+  const refreshMe = useSession((s) => s.refreshMe);
+  const hydrateCatalog = useCatalog((s) => s.hydrate);
+  const hydrateAccount = useAccount((s) => s.hydrate);
 
-  // Auto-login admins by their Telegram ID. Non-whitelisted users never
-  // see anything admin-related — they get the regular shop.
-  // 🧪 In dev (browser preview without Telegram) we auto-login as the
-  //    primary admin ID so the shield button is visible for testing.
+  // ── Бутстрап сессии ────────────────────────────────────────────
+  // 1) Если запущены внутри Telegram WebApp — логинимся через initData.
+  // 2) Если уже есть сохранённый JWT — просто подтягиваем /me.
+  // 3) Если ни того, ни другого (превью в браузере) — пропускаем,
+  //    каталог продолжит работать в read-only режиме на mock-данных.
   useEffect(() => {
-    if (user?.id) {
-      loginWithTelegram(user.id);
+    const initData = tg?.initData;
+    if (initData) {
+      loginWithInitData(initData).then(() => {
+        hydrateAccount();
+      });
     } else {
-      // ⚠️ ВРЕМЕННО: автологин админа в превью (без Telegram).
-      // Убери эту ветку перед продакшеном.
-      loginWithTelegram(8044243116);
+      refreshMe().then(() => hydrateAccount());
     }
-  }, [user?.id, loginWithTelegram]);
+    hydrateCatalog();
+  }, [tg?.initData, loginWithInitData, refreshMe, hydrateCatalog, hydrateAccount]);
 
   const [category, setCategory] = useState<string>("all");
   const [cartOpen, setCartOpen] = useState(false);
