@@ -1200,17 +1200,17 @@ const DepositsTab = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => { setConfirmTarget(o); setPhoto(""); setText(""); }}
-                      className="flex-1 gradient-primary text-primary-foreground font-bold py-2 rounded-xl flex items-center justify-center gap-1 active:scale-95"
+                      className="flex-1 gradient-primary text-primary-foreground font-bold py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 active:scale-95"
                     >
-                      <Check className="w-4 h-4" /> Подтвердить
+                      <Check className="w-4 h-4 shrink-0" /> <span>Подтвердить</span>
                     </button>
                     <button
                       onClick={() => {
                         if (confirm("Отклонить заказ?")) cancelOrder(o.id);
                       }}
-                      className="flex-1 bg-background border border-border font-bold py-2 rounded-xl flex items-center justify-center gap-1 active:scale-95 text-destructive"
+                      className="flex-1 bg-background border border-border font-bold py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 text-destructive"
                     >
-                      <X className="w-4 h-4" /> Отклонить
+                      <X className="w-4 h-4 shrink-0" /> <span>Отклонить</span>
                     </button>
                   </div>
                 </div>
