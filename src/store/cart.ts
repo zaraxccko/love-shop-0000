@@ -94,10 +94,18 @@ export const useCart = create<CartState>()(
       lines: [],
       delivery: false,
       deliveryAddress: "",
+      cartId: "",
+      reservedAt: 0,
       _syncMirror: () => {
         const key = activeKey();
         const c = get().cartsByCity[key] ?? emptyCart();
-        set({ lines: c.lines, delivery: c.delivery, deliveryAddress: c.deliveryAddress });
+        set({
+          lines: c.lines,
+          delivery: c.delivery,
+          deliveryAddress: c.deliveryAddress,
+          cartId: c.cartId,
+          reservedAt: c.reservedAt,
+        });
       },
       setDeliveryAddress: (v) =>
         set((s) => applyToActive(s, (c) => ({ ...c, deliveryAddress: v }))),
