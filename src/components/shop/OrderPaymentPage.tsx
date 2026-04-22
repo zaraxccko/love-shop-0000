@@ -3,7 +3,7 @@ import { ArrowLeft, Check, Copy, Clock, Truck, MapPin } from "lucide-react";
 import { CRYPTO_LIST, useAccount, type CryptoCode } from "@/store/account";
 import { useCart, RESERVATION_MS, DELIVERY_FEE_USD } from "@/store/cart";
 import { useI18n } from "@/lib/i18n";
-import { haptic } from "@/lib/telegram";
+import { haptic, useTelegram } from "@/lib/telegram";
 import { formatTHB } from "@/lib/format";
 import { loc } from "@/lib/loc";
 import { findDistrict } from "@/data/locations";
