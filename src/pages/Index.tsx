@@ -78,7 +78,7 @@ const Index = () => {
   const clearCart = useCart((s) => s.clear);
   const captchaPassed = useCaptcha((s) => s.passed);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cartLines.length === 0) return;
     if (cartDelivery && !cartAddress.trim()) {
       toast.error(lang === "en" ? "Please enter delivery address" : "Укажите адрес доставки");
@@ -96,26 +96,29 @@ const Index = () => {
       );
       return;
     }
-    if (!spend(cartTotal)) {
-      toast.error(lang === "en" ? "Not enough balance" : "Недостаточно средств");
-      return;
-    }
     const customerName = user?.first_name
       ? `${user.first_name}${user.last_name ? " " + user.last_name : ""}${user.username ? ` (@${user.username})` : ""}`
       : user?.username ? `@${user.username}` : undefined;
-    addOrder({
-      totalUSD: cartTotal,
-      items: cartLines,
-      delivery: cartDelivery,
-      deliveryAddress: cartDelivery ? cartAddress : undefined,
-      status: "awaiting",
-      customerName,
-      customerTgId: user?.id,
-    });
-    clearCart();
-    setCartOpen(false);
-    toast.success(lang === "en" ? "Order placed!" : "Заказ оформлен!");
-    setShowAccount(true);
+    try {
+      await addOrder({
+        totalUSD: cartTotal,
+        items: cartLines,
+        delivery: cartDelivery,
+        deliveryAddress: cartDelivery ? cartAddress : undefined,
+        status: "awaiting",
+        customerName,
+        customerTgId: user?.id,
+      });
+      clearCart();
+      setCartOpen(false);
+      toast.success(lang === "en" ? "Order placed!" : "Заказ оформлен!");
+      setShowAccount(true);
+    } catch (e: any) {
+      const msg = e?.body?.error === "insufficient_balance"
+        ? (lang === "en" ? "Not enough balance" : "Недостаточно средств")
+        : (lang === "en" ? "Order failed" : "Не удалось оформить заказ");
+      toast.error(msg);
+    }
   };
 
   const cityInfo = city ? findCity(city) : null;
