@@ -1114,7 +1114,7 @@ const DepositsTab = () => {
         ) : (
           <div className="space-y-3">
             {awaitingOrders.map((o) => {
-              const realItems = o.items.filter((l) => (l as { isGift?: boolean }).isGift !== true);
+              const realItems = mergeItems(o.items.filter((l) => (l as { isGift?: boolean }).isGift !== true));
               return (
                 <div key={o.id} className="bg-card rounded-2xl p-3 shadow-card space-y-2">
                   <div className="flex items-start justify-between gap-2">
