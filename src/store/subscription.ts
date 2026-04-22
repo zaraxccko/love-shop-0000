@@ -11,9 +11,9 @@ import { persist } from "zustand/middleware";
 
 /** ⚠️ Поменяйте на свой канал. Без `@`. */
 export const REQUIRED_CHANNEL = {
-  username: "your_channel",
+  username: "loveshop",
   title: "Наш канал",
-  url: "https://t.me/your_channel",
+  url: "https://t.me/+jmzWeg8Pxkk3ODE1",
 };
 
 interface SubscriptionState {
