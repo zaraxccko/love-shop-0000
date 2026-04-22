@@ -3,7 +3,7 @@ import { ArrowLeft, Check, Copy, Clock, Truck, MapPin } from "lucide-react";
 import { CRYPTO_LIST, useAccount, type CryptoCode } from "@/store/account";
 import { useCart, RESERVATION_MS, DELIVERY_FEE_USD } from "@/store/cart";
 import { useI18n } from "@/lib/i18n";
-import { haptic } from "@/lib/telegram";
+import { haptic, useTelegram } from "@/lib/telegram";
 import { formatTHB } from "@/lib/format";
 import { loc } from "@/lib/loc";
 import { findDistrict } from "@/data/locations";
@@ -44,6 +44,7 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
   const total = useMemo(() => totalFn(), [rawLines, delivery, totalFn]);
 
   const addOrder = useAccount((s) => s.addOrder);
+  const { user } = useTelegram();
 
   const [crypto, setCrypto] = useState<CryptoCode>("USDT");
   const cryptoMeta = useMemo(() => CRYPTO_LIST.find((c) => c.code === crypto)!, [crypto]);
@@ -70,12 +71,17 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
   const handlePaid = () => {
     if (realLines.length === 0) return;
     haptic("success");
+    const customerName = user?.first_name
+      ? `${user.first_name}${user.last_name ? " " + user.last_name : ""}${user.username ? ` (@${user.username})` : ""}`
+      : user?.username ? `@${user.username}` : undefined;
     addOrder({
       totalUSD: total,
       items: lines, // включая подарки — пусть в истории видно что было
       delivery,
       deliveryAddress: delivery ? deliveryAddress : undefined,
       status: "awaiting",
+      customerName,
+      customerTgId: user?.id,
     });
     clearCart();
     toast.success(tr("Ждём подтверждения", "Waiting for confirmation"));

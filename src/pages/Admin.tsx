@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Trash2, Pencil, Plus, RotateCcw, Eye, ChevronLeft, MapPin, Check, X } from "lucide-react";
+import { Trash2, Pencil, Plus, RotateCcw, Eye, ChevronLeft, MapPin, Check, X, Image as ImageIcon, Truck } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import { useCatalog } from "@/store/catalog";
-import { useAccount } from "@/store/account";
+import { useAccount, type OrderRecord } from "@/store/account";
 import { useT } from "@/lib/i18n";
 import { loc } from "@/lib/loc";
-import { COUNTRIES } from "@/data/locations";
+import { COUNTRIES, findDistrict } from "@/data/locations";
 import type { Category, Product, LocalizedString, StashType, VariantStash } from "@/types/shop";
 import { STASH_TYPES } from "@/types/shop";
 import { Button } from "@/components/ui/button";
@@ -1029,11 +1029,38 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
 
 const DepositsTab = () => {
   const deposits = useAccount((s) => s.deposits);
+  const orders = useAccount((s) => s.orders);
   const confirmDeposit = useAccount((s) => s.confirmDeposit);
   const cancelDeposit = useAccount((s) => s.cancelDeposit);
+  const confirmOrder = useAccount((s) => s.confirmOrder);
+  const cancelOrder = useAccount((s) => s.cancelOrder);
 
   const awaiting = deposits.filter((d) => d.status === "awaiting");
   const others = deposits.filter((d) => d.status !== "awaiting");
+  const awaitingOrders = orders.filter((o) => o.status === "awaiting");
+
+  const [confirmTarget, setConfirmTarget] = useState<OrderRecord | null>(null);
+  const [photo, setPhoto] = useState<string>("");
+  const [text, setText] = useState<string>("");
+
+  const onPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    const data = await new Promise<string>((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result as string);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+    setPhoto(data);
+  };
+
+  const submitConfirm = () => {
+    if (!confirmTarget) return;
+    confirmOrder(confirmTarget.id, { photo: photo || undefined, text: text || undefined });
+    setConfirmTarget(null);
+    setPhoto("");
+    setText("");
+  };
 
   const fmt = (iso: string) =>
     new Date(iso).toLocaleString("ru", { dateStyle: "short", timeStyle: "short" });
@@ -1053,9 +1080,112 @@ const DepositsTab = () => {
 
   return (
     <TabsContent value="deposits" className="space-y-3 mt-4">
+      {/* === Заявки на оплату ЗАКАЗА (товары) === */}
       <div>
         <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">
-          Ожидают подтверждения ({awaiting.length})
+          Заказы — ждут подтверждения ({awaitingOrders.length})
+        </div>
+        {awaitingOrders.length === 0 ? (
+          <div className="bg-card rounded-2xl p-4 text-center text-sm text-muted-foreground shadow-card">
+            Нет новых заказов
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {awaitingOrders.map((o) => {
+              const realItems = o.items.filter((l) => (l as { isGift?: boolean }).isGift !== true);
+              return (
+                <div key={o.id} className="bg-card rounded-2xl p-3 shadow-card space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-display font-bold text-lg">${o.totalUSD}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">
+                        {o.customerName ?? (o.customerTgId ? `TG ${o.customerTgId}` : "Гость")} · {fmt(o.createdAt)}
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full shrink-0 ${statusClass.awaiting}`}>
+                      {statusLabel.awaiting}
+                    </span>
+                  </div>
+
+                  {/* Состав заказа */}
+                  <div className="space-y-1.5 bg-background rounded-xl p-2.5">
+                    {realItems.map((l, idx) => {
+                      const districtName = l.districtSlug
+                        ? findDistrict(l.districtSlug)?.name.ru ?? l.districtSlug
+                        : null;
+                      const stashMeta = l.stashType
+                        ? STASH_TYPES.find((t) => t.value === l.stashType)
+                        : null;
+                      return (
+                        <div key={idx} className="text-xs">
+                          <div className="font-semibold flex items-center justify-between gap-2">
+                            <span className="truncate">
+                              {l.product.emoji} {loc(l.product.name, "ru")}
+                              {l.variantId && (
+                                <span className="text-muted-foreground font-normal"> · {l.variantId}</span>
+                              )}
+                            </span>
+                            <span className="shrink-0 font-bold">× {l.qty}</span>
+                          </div>
+                          {/* Если доставка — не показываем район/закладку */}
+                          {!o.delivery && (districtName || stashMeta) && (
+                            <div className="mt-0.5 flex flex-wrap gap-1 text-[10px]">
+                              {districtName && (
+                                <span className="inline-flex items-center gap-0.5 bg-muted rounded-full px-1.5 py-0.5">
+                                  <MapPin className="w-2.5 h-2.5" /> {districtName}
+                                </span>
+                              )}
+                              {stashMeta && (
+                                <span className="inline-flex items-center gap-0.5 bg-muted rounded-full px-1.5 py-0.5">
+                                  {stashMeta.emoji} {stashMeta.label.ru}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {o.delivery && (
+                    <div className="rounded-xl bg-primary/5 border border-primary/20 px-2.5 py-2 text-[11px] flex items-start gap-1.5">
+                      <Truck className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <div className="font-bold text-primary">Доставка курьером</div>
+                        {o.deliveryAddress && (
+                          <div className="text-foreground/80 whitespace-pre-wrap">{o.deliveryAddress}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setConfirmTarget(o); setPhoto(""); setText(""); }}
+                      className="flex-1 gradient-primary text-primary-foreground font-bold py-2 rounded-xl flex items-center justify-center gap-1 active:scale-95"
+                    >
+                      <Check className="w-4 h-4" /> Подтвердить
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm("Отклонить заказ?")) cancelOrder(o.id);
+                      }}
+                      className="flex-1 bg-background border border-border font-bold py-2 rounded-xl flex items-center justify-center gap-1 active:scale-95 text-destructive"
+                    >
+                      <X className="w-4 h-4" /> Отклонить
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* === Заявки на пополнение БАЛАНСА (крипта) === */}
+      <div>
+        <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2 mt-4">
+          Пополнения — ждут подтверждения ({awaiting.length})
         </div>
         {awaiting.length === 0 ? (
           <div className="bg-card rounded-2xl p-4 text-center text-sm text-muted-foreground shadow-card">
@@ -1101,7 +1231,7 @@ const DepositsTab = () => {
 
       <div>
         <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2 mt-4">
-          История ({others.length})
+          История пополнений ({others.length})
         </div>
         {others.length === 0 ? (
           <div className="bg-card rounded-2xl p-4 text-center text-sm text-muted-foreground shadow-card">
@@ -1123,6 +1253,73 @@ const DepositsTab = () => {
           </div>
         )}
       </div>
+
+      {/* === Модалка подтверждения заказа: фото + текст === */}
+      <Dialog open={!!confirmTarget} onOpenChange={(v) => { if (!v) setConfirmTarget(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Подтвердить заказ</DialogTitle>
+          </DialogHeader>
+          {confirmTarget && (
+            <div className="space-y-3">
+              <div className="text-xs text-muted-foreground">
+                {confirmTarget.customerName ?? "Гость"} · ${confirmTarget.totalUSD}
+              </div>
+
+              <div>
+                <Label className="text-xs">
+                  {confirmTarget.delivery ? "Фото для клиента (опционально)" : "Фото закладки"}
+                </Label>
+                <div className="mt-1.5 rounded-xl border border-dashed border-border p-3">
+                  {photo ? (
+                    <div className="space-y-2">
+                      <img src={photo} alt="preview" className="w-full max-h-64 object-contain rounded-lg" />
+                      <button
+                        onClick={() => setPhoto("")}
+                        className="text-xs text-destructive font-bold"
+                      >
+                        Убрать фото
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-1 py-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
+                      <ImageIcon className="w-6 h-6" />
+                      <span className="text-xs">Загрузить фото</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => onPhoto(e.target.files?.[0])}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs">Сообщение клиенту</Label>
+                <Textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={confirmTarget.delivery
+                    ? "Курьер выехал, ждите в течение 40–60 мин."
+                    : "Координаты, описание места, ориентиры..."}
+                  rows={4}
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setConfirmTarget(null)}>
+              Отмена
+            </Button>
+            <Button onClick={submitConfirm} className="gradient-primary">
+              <Check className="w-4 h-4 mr-1" /> Отправить клиенту
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TabsContent>
   );
 };
