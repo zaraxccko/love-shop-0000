@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { RefreshCw, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ShieldCheck } from "lucide-react";
 import { useCaptcha } from "@/store/captcha";
 import { useI18n } from "@/lib/i18n";
 import { haptic } from "@/lib/telegram";
@@ -178,6 +178,3 @@ export const CaptchaGate = () => {
     </div>
   );
 };
-
-// keep refresh import-safe
-void RefreshCw;
