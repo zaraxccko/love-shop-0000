@@ -176,15 +176,39 @@ export const ImageCropper = ({ open, src, size = 512, onCancel, onConfirm }: Ima
             </div>
 
             <div className="px-2">
-              <div className="text-xs text-muted-foreground mb-1">Масштаб ×{zoom.toFixed(2)}</div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs text-muted-foreground">Масштаб ×{zoom.toFixed(2)}</div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="text-[11px] text-primary font-medium active:opacity-70"
+                    onClick={() => { setZoom(minZoom); setPos({ x: 0, y: 0 }); }}
+                  >
+                    Вписать всю
+                  </button>
+                  <button
+                    type="button"
+                    className="text-[11px] text-primary font-medium active:opacity-70"
+                    onClick={() => { setZoom(1); setPos({ x: 0, y: 0 }); }}
+                  >
+                    Заполнить
+                  </button>
+                </div>
+              </div>
               <Slider
                 value={[zoom]}
-                min={1}
+                min={Math.min(minZoom, 1)}
                 max={4}
                 step={0.01}
                 onValueChange={(v) => setZoom(v[0])}
               />
             </div>
+
+            <div className="text-[11px] text-muted-foreground text-center">
+              Перетащите картинку, чтобы выбрать видимую область
+            </div>
+          </div>
+        )}
 
             <div className="text-[11px] text-muted-foreground text-center">
               Перетащите картинку, чтобы выбрать видимую область
