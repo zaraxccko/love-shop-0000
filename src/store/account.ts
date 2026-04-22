@@ -41,6 +41,10 @@ export interface Deposit {
   status: DepositStatus;
   paidAt?: string;
   confirmedAt?: string;
+  /** Telegram username/first_name юзера — для админки. */
+  customerName?: string;
+  /** Telegram ID юзера. */
+  customerTgId?: number;
 }
 
 export type OrderHistoryStatus = "awaiting" | "paid" | "in_delivery" | "completed" | "cancelled";
