@@ -72,17 +72,49 @@ export const BroadcastTab = () => {
       toast.error("У кнопки должна быть ссылка");
       return;
     }
+    const endpoint = import.meta.env.VITE_BROADCAST_URL as string | undefined;
+    if (!endpoint) {
+      toast.error("VITE_BROADCAST_URL не задан — укажи URL твоего бота на VPS");
+      return;
+    }
     haptic("medium");
     setSending(true);
-    // TODO: fetch('/api/broadcast', { text, image, button, segment })
-    await new Promise((r) => setTimeout(r, 1200));
-    setSending(false);
-    haptic("success");
-    toast.success(`Рассылка поставлена в очередь · ${recipients.toLocaleString("ru")} получателей`);
-    setText("");
-    setImage(null);
-    setBtnText("");
-    setBtnUrl("");
+    try {
+      const token = import.meta.env.VITE_ADMIN_API_TOKEN as string | undefined;
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          segment,
+          text,
+          image, // dataURL или null
+          button: btnText.trim()
+            ? { text: btnText.trim(), url: btnUrl.trim() }
+            : null,
+        }),
+      });
+      if (!res.ok) {
+        const msg = await res.text().catch(() => "");
+        throw new Error(`${res.status} ${msg || res.statusText}`);
+      }
+      const data = await res.json().catch(() => ({} as { queued?: number }));
+      haptic("success");
+      toast.success(
+        `Рассылка поставлена в очередь · ${(data.queued ?? recipients).toLocaleString("ru")} получателей`
+      );
+      setText("");
+      setImage(null);
+      setBtnText("");
+      setBtnUrl("");
+    } catch (e) {
+      haptic("error");
+      toast.error(`Не удалось отправить: ${e instanceof Error ? e.message : "ошибка сети"}`);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
