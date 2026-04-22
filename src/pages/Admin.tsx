@@ -31,6 +31,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { AnalyticsTab } from "@/components/shop/admin/AnalyticsTab";
 import { BroadcastTab } from "@/components/shop/admin/BroadcastTab";
+import { ImageCropper } from "@/components/shop/admin/ImageCropper";
 
 const GRADIENTS = ["gradient-mango", "gradient-mint", "gradient-grape", "gradient-primary", "gradient-hero"];
 
@@ -96,6 +97,7 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
   const [editingP, setEditingP] = useState<Product | null>(null);
   const [editingC, setEditingC] = useState<Category | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
   const allCities = COUNTRIES.flatMap((c) => c.cities.map((city) => ({ ...city, country: c })));
@@ -511,19 +513,28 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                     accept="image/*"
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
+                      e.currentTarget.value = "";
                       if (!file) return;
                       const url = await fileToDataUrl(file);
-                      setEditingP({ ...editingP, imageUrl: url });
+                      setCropSrc(url);
                     }}
                     className="text-xs"
                   />
                   {editingP.imageUrl && (
-                    <button
-                      onClick={() => setEditingP({ ...editingP, imageUrl: undefined })}
-                      className="text-xs text-destructive"
-                    >
-                      ✕
-                    </button>
+                    <>
+                      <button
+                        onClick={() => setCropSrc(editingP.imageUrl!)}
+                        className="text-xs text-primary"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        onClick={() => setEditingP({ ...editingP, imageUrl: undefined })}
+                        className="text-xs text-destructive"
+                      >
+                        ✕
+                      </button>
+                    </>
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1">{t("admin.imageHint")}</p>
@@ -1002,6 +1013,16 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ImageCropper
+        open={!!cropSrc}
+        src={cropSrc}
+        onCancel={() => setCropSrc(null)}
+        onConfirm={(dataUrl) => {
+          if (editingP) setEditingP({ ...editingP, imageUrl: dataUrl });
+          setCropSrc(null);
+        }}
+      />
     </div>
   );
 };
