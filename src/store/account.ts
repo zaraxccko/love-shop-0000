@@ -53,6 +53,15 @@ export interface OrderRecord {
   delivery: boolean;
   deliveryAddress?: string;
   status: OrderHistoryStatus;
+  /** Telegram username/first_name юзера, оформившего заказ — для админки. */
+  customerName?: string;
+  /** Telegram ID юзера. */
+  customerTgId?: number;
+  /** Фото-подтверждение (закладки) от админа, dataURL. */
+  confirmPhoto?: string;
+  /** Сопроводительный текст от админа. */
+  confirmText?: string;
+  confirmedAt?: string;
 }
 
 interface AccountState {
@@ -68,6 +77,10 @@ interface AccountState {
   cancelDeposit: (id: string) => void;
 
   addOrder: (o: Omit<OrderRecord, "id" | "createdAt" | "status"> & { status?: OrderHistoryStatus }) => OrderRecord;
+  /** Админ подтверждает оплату заказа: прикрепляет фото-закладку и текст. */
+  confirmOrder: (id: string, payload: { photo?: string; text?: string }) => void;
+  /** Админ отклоняет заказ. */
+  cancelOrder: (id: string) => void;
   /** Списать с баланса. true — успех, false — недостаточно средств. */
   spend: (amountUSD: number) => boolean;
 }
