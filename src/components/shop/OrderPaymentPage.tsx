@@ -259,6 +259,13 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
               </div>
             </section>
 
+            {/* Crypto amount + копирование */}
+            <CryptoAmountCard
+              amountUSD={total}
+              crypto={crypto}
+              cryptoName={`${cryptoMeta.name} · ${cryptoMeta.network}`}
+            />
+
             {/* Wallet address */}
             <section className="rounded-2xl bg-card shadow-card p-4">
               <div className="text-xs text-muted-foreground mb-1">
