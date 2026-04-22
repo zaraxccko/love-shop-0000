@@ -69,7 +69,6 @@ const Index = () => {
   const [orderPayOpen, setOrderPayOpen] = useState(false);
 
   const balance = useAccount((s) => s.balanceUSD);
-  const spend = useAccount((s) => s.spend);
   const addOrder = useAccount((s) => s.addOrder);
   const cartLines = useCart((s) => s.lines);
   const cartTotal = useCart((s) => s.totalTHB());
