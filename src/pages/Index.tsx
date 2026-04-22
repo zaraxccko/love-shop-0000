@@ -171,12 +171,21 @@ const Index = () => {
       />
     );
 
+  if (orderPayOpen)
+    return (
+      <OrderPaymentPage
+        onBack={() => setOrderPayOpen(false)}
+        onPaid={() => { setOrderPayOpen(false); setShowAccount(true); }}
+      />
+    );
+
   if (showAccount)
     return (
       <AccountPage
         onBack={() => setShowAccount(false)}
         onTopUp={() => { setShowAccount(false); setDepositSuggested(undefined); setDepositOpen(true); }}
         onOpenCart={() => { setShowAccount(false); setCartOpen(true); }}
+        onOpenActiveOrder={() => { setShowAccount(false); setOrderPayOpen(true); }}
       />
     );
 
