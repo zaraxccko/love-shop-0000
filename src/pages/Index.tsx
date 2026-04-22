@@ -100,6 +100,7 @@ const Index = () => {
       items: cartLines,
       delivery: cartDelivery,
       deliveryAddress: cartDelivery ? cartAddress : undefined,
+      status: "awaiting",
       customerName,
       customerTgId: user?.id,
     });
