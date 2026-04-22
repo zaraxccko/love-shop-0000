@@ -8,6 +8,7 @@ import { formatTHB } from "@/lib/format";
 import { loc } from "@/lib/loc";
 import { findDistrict } from "@/data/locations";
 import { STASH_TYPES } from "@/types/shop";
+import { CryptoAmountCard } from "@/components/shop/CryptoAmountCard";
 import { toast } from "sonner";
 
 interface OrderPaymentPageProps {
