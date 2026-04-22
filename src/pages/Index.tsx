@@ -11,6 +11,7 @@ import { LocationPicker } from "@/components/shop/LocationPicker";
 import { ProductSheet } from "@/components/shop/ProductSheet";
 import { DepositPage } from "@/components/shop/DepositPage";
 import { AccountPage } from "@/components/shop/AccountPage";
+import { OrderPaymentPage } from "@/components/shop/OrderPaymentPage";
 import { CaptchaGate } from "@/components/shop/CaptchaGate";
 import { useCaptcha } from "@/store/captcha";
 import { useTelegram } from "@/lib/telegram";
