@@ -58,6 +58,7 @@ const Index = () => {
   const [showAccount, setShowAccount] = useState(false);
   const [depositOpen, setDepositOpen] = useState(false);
   const [depositSuggested, setDepositSuggested] = useState<number | undefined>(undefined);
+  const [orderPayOpen, setOrderPayOpen] = useState(false);
 
   const balance = useAccount((s) => s.balanceUSD);
   const spend = useAccount((s) => s.spend);
