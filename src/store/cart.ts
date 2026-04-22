@@ -98,7 +98,18 @@ export const useCart = create<CartState>()(
       reservedAt: 0,
       _syncMirror: () => {
         const key = activeKey();
-        const c = get().cartsByCity[key] ?? emptyCart();
+        let c = get().cartsByCity[key] ?? emptyCart();
+        // Миграция старых корзин без cartId/reservedAt
+        if (c.lines.length > 0 && (!c.cartId || c.reservedAt === 0)) {
+          c = {
+            ...c,
+            cartId: c.cartId || newCartId(),
+            reservedAt: c.reservedAt || Date.now(),
+          };
+          set((s) => ({
+            cartsByCity: { ...s.cartsByCity, [key]: c },
+          }));
+        }
         set({
           lines: c.lines,
           delivery: c.delivery,
