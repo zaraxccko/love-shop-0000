@@ -87,9 +87,6 @@ export const BroadcastTab = () => {
 
   return (
     <TabsContent value="broadcast" className="space-y-4 mt-4">
-      <div className="rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-[11px] text-muted-foreground">
-        📢 Рассылка отправится через бота на VPS. Сейчас — заглушка для дизайна.
-      </div>
 
       <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
         <div>

@@ -129,10 +129,6 @@ export const AnalyticsTab = () => {
   const a = MOCK_ANALYTICS;
   return (
     <TabsContent value="analytics" className="space-y-4 mt-4">
-      <div className="rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-[11px] text-muted-foreground">
-        📊 Демо-данные. Реальные цифры появятся после подключения бота на VPS.
-      </div>
-
       {/* KPI grid */}
       <div className="grid grid-cols-2 gap-2">
         <KPI icon={Users} label="Юзеров" value={a.totals.users.toLocaleString("ru")} hint="всего" />
