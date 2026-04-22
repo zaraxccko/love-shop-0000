@@ -1005,6 +1005,16 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ImageCropper
+        open={!!cropSrc}
+        src={cropSrc}
+        onCancel={() => setCropSrc(null)}
+        onConfirm={(dataUrl) => {
+          if (editingP) setEditingP({ ...editingP, imageUrl: dataUrl });
+          setCropSrc(null);
+        }}
+      />
     </div>
   );
 };
