@@ -110,6 +110,16 @@ export const useCatalog = create<CatalogState>()(
     {
       name: "loveshop-catalog-v4",
       partialize: (s) => ({ categories: s.categories, products: s.products }),
+      // Защита от повреждённого/устаревшего кэша.
+      merge: (persisted: any, current) => {
+        const safe = (v: any, fallback: any[]) => (Array.isArray(v) ? v : fallback);
+        return {
+          ...current,
+          ...(persisted ?? {}),
+          products: safe(persisted?.products, DEFAULT_PRODUCTS),
+          categories: safe(persisted?.categories, DEFAULT_CATEGORIES),
+        };
+      },
     }
   )
 );
