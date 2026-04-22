@@ -47,12 +47,12 @@ export const SubscriptionGate = () => {
 
       <div className="mt-6 w-full bg-card rounded-2xl shadow-card p-4 flex items-center gap-3">
         <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
-          @
+          <Send className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0 text-left">
           <div className="font-bold truncate">{REQUIRED_CHANNEL.title}</div>
           <div className="text-xs text-muted-foreground truncate">
-            @{REQUIRED_CHANNEL.username}
+            {tr("Приватный канал в Telegram", "Private Telegram channel")}
           </div>
         </div>
       </div>
