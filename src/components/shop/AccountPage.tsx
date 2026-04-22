@@ -1,6 +1,7 @@
-import { ArrowLeft, Wallet, Plus, Package, Receipt, User as UserIcon, ShoppingBag } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Wallet, Plus, Package, Receipt, User as UserIcon, ShoppingBag, Clock } from "lucide-react";
 import { useAccount } from "@/store/account";
-import { useCart } from "@/store/cart";
+import { useCart, RESERVATION_MS } from "@/store/cart";
 import { useI18n } from "@/lib/i18n";
 import { useTelegram, haptic } from "@/lib/telegram";
 import { formatTHB } from "@/lib/format";
@@ -34,6 +35,26 @@ export const AccountPage = ({ onBack, onTopUp, onOpenCart }: AccountPageProps) =
   const deposits = useAccount((s) => s.deposits);
   const cartLines = useCart((s) => s.lines);
   const cartTotal = useCart((s) => s.totalTHB());
+  const cartId = useCart((s) => s.cartId);
+  const reservedAt = useCart((s) => s.reservedAt);
+  const clearCart = useCart((s) => s.clear);
+
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!reservedAt || cartLines.length === 0) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [reservedAt, cartLines.length]);
+
+  const msLeft = reservedAt ? Math.max(0, reservedAt + RESERVATION_MS - now) : 0;
+  useEffect(() => {
+    if (reservedAt && cartLines.length > 0 && msLeft === 0) {
+      clearCart();
+    }
+  }, [msLeft, reservedAt, cartLines.length, clearCart]);
+
+  const mm = String(Math.floor(msLeft / 60000)).padStart(2, "0");
+  const ss = String(Math.floor((msLeft % 60000) / 1000)).padStart(2, "0");
 
   const tr = (ru: string, en: string) => (lang === "ru" ? ru : en);
   const fmtDate = (iso: string) =>
@@ -108,12 +129,25 @@ export const AccountPage = ({ onBack, onTopUp, onOpenCart }: AccountPageProps) =
           ) : (
             <button
               onClick={onOpenCart}
-              className="w-full rounded-2xl bg-card shadow-card p-4 text-left active:scale-[0.99]"
+              className="w-full rounded-2xl bg-card shadow-card p-4 text-left active:scale-[0.99] space-y-2"
             >
-              <div className="text-xs text-muted-foreground">
-                {cartLines.length} {tr("позиций", "items")}
+              <div className="flex items-center justify-between">
+                <div className="text-[11px] font-mono font-bold text-muted-foreground">
+                  #{cartId}
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  {cartLines.length} {tr("позиций", "items")}
+                </div>
               </div>
-              <div className="font-display font-bold text-xl mt-1">{formatTHB(cartTotal)}</div>
+              <div className="font-display font-bold text-xl">{formatTHB(cartTotal)}</div>
+              {reservedAt > 0 && (
+                <div className="flex items-center gap-2 rounded-xl bg-amber-500/10 text-amber-600 px-3 py-2">
+                  <Clock className="w-4 h-4" />
+                  <div className="text-[11px] font-bold">
+                    {tr("Зарезервировано", "Reserved")} · {mm}:{ss}
+                  </div>
+                </div>
+              )}
             </button>
           )}
         </section>

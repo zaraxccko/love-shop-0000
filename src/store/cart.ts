@@ -19,13 +19,27 @@ export interface DisplayCartLine extends CartLine {
 
 export const DELIVERY_FEE_USD = 20;
 
+/** Время резерва товаров в корзине (мс). */
+export const RESERVATION_MS = 30 * 60 * 1000;
+
+const newCartId = () =>
+  "ORD-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+
 interface CityCart {
   lines: CartLine[];
   delivery: boolean;
   deliveryAddress: string;
+  cartId: string;
+  reservedAt: number;
 }
 
-const emptyCart = (): CityCart => ({ lines: [], delivery: false, deliveryAddress: "" });
+const emptyCart = (): CityCart => ({
+  lines: [],
+  delivery: false,
+  deliveryAddress: "",
+  cartId: newCartId(),
+  reservedAt: 0,
+});
 const activeKey = () => useLocation.getState().city ?? "__none__";
 
 interface CartState {
@@ -35,6 +49,8 @@ interface CartState {
   lines: CartLine[];
   delivery: boolean;
   deliveryAddress: string;
+  cartId: string;
+  reservedAt: number;
   setDeliveryAddress: (v: string) => void;
   setDelivery: (v: boolean) => void;
   toggleDelivery: () => void;
@@ -66,6 +82,8 @@ const applyToActive = (
     lines: next.lines,
     delivery: next.delivery,
     deliveryAddress: next.deliveryAddress,
+    cartId: next.cartId,
+    reservedAt: next.reservedAt,
   };
 };
 
@@ -76,10 +94,18 @@ export const useCart = create<CartState>()(
       lines: [],
       delivery: false,
       deliveryAddress: "",
+      cartId: "",
+      reservedAt: 0,
       _syncMirror: () => {
         const key = activeKey();
         const c = get().cartsByCity[key] ?? emptyCart();
-        set({ lines: c.lines, delivery: c.delivery, deliveryAddress: c.deliveryAddress });
+        set({
+          lines: c.lines,
+          delivery: c.delivery,
+          deliveryAddress: c.deliveryAddress,
+          cartId: c.cartId,
+          reservedAt: c.reservedAt,
+        });
       },
       setDeliveryAddress: (v) =>
         set((s) => applyToActive(s, (c) => ({ ...c, deliveryAddress: v }))),
@@ -98,17 +124,24 @@ export const useCart = create<CartState>()(
               stashType: opts?.stashType,
               priceUSD: opts?.priceUSD,
             };
+            // Если корзина пустая или резерв истёк — стартуем новый заказ
+            const expired =
+              c.reservedAt > 0 && Date.now() - c.reservedAt > RESERVATION_MS;
+            const base =
+              c.lines.length === 0 || expired
+                ? { ...c, cartId: newCartId(), reservedAt: Date.now() }
+                : c;
             const key = lineKey(candidate);
-            const existing = c.lines.find((l) => lineKey(l) === key);
+            const existing = base.lines.find((l) => lineKey(l) === key);
             if (existing) {
               return {
-                ...c,
-                lines: c.lines.map((l) =>
+                ...base,
+                lines: base.lines.map((l) =>
                   lineKey(l) === key ? { ...l, qty: l.qty + 1 } : l
                 ),
               };
             }
-            return { ...c, lines: [...c.lines, candidate] };
+            return { ...base, lines: [...base.lines, candidate] };
           })
         ),
       remove: (key) =>
@@ -116,7 +149,7 @@ export const useCart = create<CartState>()(
           applyToActive(s, (c) => {
             const lines = c.lines.filter((l) => lineKey(l) !== key);
             return lines.length === 0
-              ? { lines, delivery: false, deliveryAddress: "" }
+              ? emptyCart()
               : { ...c, lines };
           })
         ),
