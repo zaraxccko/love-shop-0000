@@ -29,10 +29,12 @@ interface Cell {
   scale: number;
 }
 
+const DECOYS = ["🍓", "🍉", "🌙", "🎾"];
+
 function buildBoard(): { cells: Cell[]; targetIndex: number } {
   const targetIndex = Math.floor(Math.random() * CELLS);
   const cells: Cell[] = Array.from({ length: CELLS }, (_, i) => ({
-    emoji: i === targetIndex ? "🥥" : "🍓",
+    emoji: i === targetIndex ? "🥥" : DECOYS[Math.floor(Math.random() * DECOYS.length)],
     rotate: (Math.random() - 0.5) * 0.6, // ±0.3 rad
     offsetX: (Math.random() - 0.5) * (CELL * 0.25),
     offsetY: (Math.random() - 0.5) * (CELL * 0.25),
@@ -141,8 +143,6 @@ export const CaptchaGate = () => {
       <p className="text-muted-foreground mt-3 text-sm leading-relaxed max-w-xs">
         {tr("Найди и тапни ", "Find and tap ")}
         <span className="text-2xl align-middle">🥥</span>
-        {tr(" среди ", " among ")}
-        <span className="text-2xl align-middle">🍓</span>
       </p>
 
       <div className="mt-6 bg-card rounded-3xl shadow-card p-3 relative">
