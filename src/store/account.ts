@@ -166,7 +166,7 @@ export const useAccount = create<AccountState>()(
             o.id === id
               ? {
                   ...o,
-                  status: "paid",
+                  status: "completed",
                   confirmPhoto: payload.photo,
                   confirmText: payload.text,
                   confirmedAt: new Date().toISOString(),
