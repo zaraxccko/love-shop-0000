@@ -521,12 +521,20 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
                     className="text-xs"
                   />
                   {editingP.imageUrl && (
-                    <button
-                      onClick={() => setEditingP({ ...editingP, imageUrl: undefined })}
-                      className="text-xs text-destructive"
-                    >
-                      ✕
-                    </button>
+                    <>
+                      <button
+                        onClick={() => setCropSrc(editingP.imageUrl!)}
+                        className="text-xs text-primary"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        onClick={() => setEditingP({ ...editingP, imageUrl: undefined })}
+                        className="text-xs text-destructive"
+                      >
+                        ✕
+                      </button>
+                    </>
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1">{t("admin.imageHint")}</p>
