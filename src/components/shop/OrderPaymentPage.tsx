@@ -29,14 +29,19 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
   const lang = useI18n((s) => s.lang) ?? "ru";
   const tr = (ru: string, en: string) => (lang === "ru" ? ru : en);
 
-  const lines = useCart((s) => s.linesWithGifts());
+  const rawLines = useCart((s) => s.lines);
   const cartId = useCart((s) => s.cartId);
-  const subtotal = useCart((s) => s.subtotalUSD());
-  const total = useCart((s) => s.totalTHB());
   const delivery = useCart((s) => s.delivery);
   const deliveryAddress = useCart((s) => s.deliveryAddress);
   const reservedAt = useCart((s) => s.reservedAt);
   const clearCart = useCart((s) => s.clear);
+  const linesWithGifts = useCart((s) => s.linesWithGifts);
+  const subtotalFn = useCart((s) => s.subtotalUSD);
+  const totalFn = useCart((s) => s.totalTHB);
+
+  const lines = useMemo(() => linesWithGifts(), [rawLines, linesWithGifts]);
+  const subtotal = useMemo(() => subtotalFn(), [rawLines, subtotalFn]);
+  const total = useMemo(() => totalFn(), [rawLines, delivery, totalFn]);
 
   const addOrder = useAccount((s) => s.addOrder);
 
