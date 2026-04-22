@@ -19,7 +19,7 @@ const statusMeta = {
   awaiting:    { ru: "Ожидает",     en: "Pending",     cls: "bg-amber-500/15 text-amber-600" },
   paid:        { ru: "Оплачен",     en: "Paid",        cls: "bg-primary/15 text-primary" },
   in_delivery: { ru: "В доставке",  en: "In delivery", cls: "bg-amber-500/15 text-amber-600" },
-  completed:   { ru: "Получен",     en: "Completed",   cls: "bg-emerald-500/15 text-emerald-600" },
+  completed:   { ru: "Выдан",       en: "Delivered",   cls: "bg-emerald-500/15 text-emerald-600" },
   cancelled:   { ru: "Отменён",     en: "Cancelled",   cls: "bg-destructive/15 text-destructive" },
 } as const;
 
