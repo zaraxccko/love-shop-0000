@@ -1062,8 +1062,30 @@ const DepositsTab = () => {
     setText("");
   };
 
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleString("ru", { dateStyle: "short", timeStyle: "short" });
+  const fmt = (iso: string) => {
+    const d = new Date(iso);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${dd}.${mm}, ${hh}:${mi}`;
+  };
+
+  /** Объединяем одинаковые позиции (товар+вариант+район+закладка+isGift) в одну строку. */
+  const mergeItems = (items: OrderRecord["items"]) => {
+    const map = new Map<string, (typeof items)[number]>();
+    for (const l of items) {
+      const isGift = (l as { isGift?: boolean }).isGift === true;
+      const key = `${l.product.id}::${l.variantId ?? ""}::${l.districtSlug ?? ""}::${l.stashType ?? ""}::${isGift ? "g" : ""}`;
+      const existing = map.get(key);
+      if (existing) {
+        map.set(key, { ...existing, qty: existing.qty + l.qty });
+      } else {
+        map.set(key, { ...l });
+      }
+    }
+    return Array.from(map.values());
+  };
 
   const statusLabel: Record<string, string> = {
     pending: "Создана",
@@ -1092,7 +1114,7 @@ const DepositsTab = () => {
         ) : (
           <div className="space-y-3">
             {awaitingOrders.map((o) => {
-              const realItems = o.items.filter((l) => (l as { isGift?: boolean }).isGift !== true);
+              const realItems = mergeItems(o.items.filter((l) => (l as { isGift?: boolean }).isGift !== true));
               return (
                 <div key={o.id} className="bg-card rounded-2xl p-3 shadow-card space-y-2">
                   <div className="flex items-start justify-between gap-2">
