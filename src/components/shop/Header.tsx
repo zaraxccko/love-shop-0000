@@ -22,6 +22,13 @@ export const Header = ({ onCartClick, onLocationClick, showAdminButton, onAdminC
   const lang = useI18n((s) => s.lang) ?? "ru";
   const city = useLocation((s) => s.city);
   const found = city ? findCity(city) : null;
+  const setSubscribed = useSubscription((s) => s.setSubscribed);
+
+  const resetSubscription = () => {
+    haptic("warning");
+    setSubscribed(false);
+    toast.success(lang === "ru" ? "Подписка сброшена" : "Subscription reset");
+  };
 
   return (
     <header className="sticky top-0 z-30 px-5 pt-5 pb-3 bg-background/80 backdrop-blur-xl">
