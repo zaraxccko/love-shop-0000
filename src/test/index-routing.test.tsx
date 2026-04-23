@@ -8,6 +8,7 @@ import { useCatalog } from "@/store/catalog";
 import { useSession } from "@/store/session";
 import { useAccount } from "@/store/account";
 import { useCart } from "@/store/cart";
+import type { CartLine } from "@/types/shop";
 
 vi.mock("@/lib/telegram", () => ({
   haptic: vi.fn(),
@@ -63,7 +64,7 @@ vi.mock("@/components/shop/LocationPicker", () => ({ LocationPicker: () => <div>
 vi.mock("@/components/shop/CaptchaGate", () => ({ CaptchaGate: () => <div>captcha-screen</div> }));
 vi.mock("@/pages/Admin", () => ({ default: () => <div>admin-screen</div> }));
 
-const mockCartLine = {
+const mockCartLine: CartLine = {
   product: {
     id: "product-1",
     name: { ru: "Товар", en: "Product" },
@@ -80,7 +81,7 @@ const mockCartLine = {
   qty: 1,
   variantId: "1g",
   districtSlug: "district-1",
-  stashType: "prikop",
+  stashType: "prikop" as const,
   priceUSD: 100,
 };
 
