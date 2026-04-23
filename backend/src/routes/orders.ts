@@ -67,9 +67,23 @@ export async function orderRoutes(app: FastifyInstance) {
 
     if (!order) return;
 
-    const user = await prisma.user.findUnique({ where: { tgId: req.user!.tgId } });
-    const who = user?.username ? `@${user.username}` : user?.firstName ?? `tg:${order.userTgId}`;
-    notifyAdmins(`🛒 <b>Новый заказ</b>\n${who}\n$${order.totalUSD}${order.delivery ? " · доставка" : ""}`);
+    try {
+      const user = await prisma.user.findUnique({ where: { tgId: req.user!.tgId } });
+      const who = user?.username ? `@${user.username}` : user?.firstName ?? `tg:${order.userTgId}`;
+      const itemsCount = Array.isArray(order.items) ? (order.items as any[]).length : 0;
+      const text =
+        `🛒 <b>Новый заказ</b> #${order.id}\n` +
+        `👤 ${who}\n` +
+        `💰 $${order.totalUSD.toFixed(2)}\n` +
+        `📦 позиций: ${itemsCount}` +
+        (order.delivery ? `\n🚚 доставка: ${order.deliveryAddress ?? "—"}` : "");
+      // не блокируем ответ пользователю
+      notifyAdmins(text).catch((err) =>
+        req.log.error({ err }, "notifyAdmins failed for new order")
+      );
+    } catch (err) {
+      req.log.error({ err }, "failed to build admin notification");
+    }
 
     return serialize(order);
   });

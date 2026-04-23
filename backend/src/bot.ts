@@ -79,11 +79,28 @@ export async function broadcast(opts: {
 }
 
 export async function notifyAdmins(text: string): Promise<void> {
+  if (!env.adminTgIds.length) {
+    console.warn("[notifyAdmins] ADMIN_TG_IDS is empty — skipping admin notification");
+    return;
+  }
   await Promise.all(
     env.adminTgIds.map((id) =>
-      queue.add(() =>
-        bot.sendMessage(Number(id), text, { parse_mode: "HTML" }).catch(() => undefined)
-      )
+      queue.add(async () => {
+        try {
+          await bot.sendMessage(Number(id), text, { parse_mode: "HTML" });
+        } catch (err: any) {
+          const code = err?.response?.body?.error_code ?? err?.code;
+          const description = err?.response?.body?.description ?? err?.message;
+          if (code === 403) {
+            console.warn(
+              `[notifyAdmins] admin ${id} has not started a chat with the bot (403). ` +
+              `Ask them to open the bot and press /start.`
+            );
+          } else {
+            console.error(`[notifyAdmins] failed to notify ${id}: ${code ?? "?"} — ${description}`);
+          }
+        }
+      })
     )
   );
 }
