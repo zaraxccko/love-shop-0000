@@ -32,8 +32,6 @@ const statusMeta = {
 
 type HistoryFilter = "all" | "confirmed" | "cancelled";
 
-const SUPPORT_USERNAME = "oxescrow";
-
 export const AccountPage = ({ onBack, onOpenCart, onOpenActiveOrder }: AccountPageProps) => {
   const lang = useI18n((s) => s.lang) ?? "ru";
   const { user } = useTelegram();
