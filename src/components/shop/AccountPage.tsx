@@ -33,7 +33,7 @@ const statusMeta = {
 
 type HistoryFilter = "all" | "confirmed" | "cancelled";
 
-const SUPPORT_USERNAME = (import.meta.env.VITE_SUPPORT_USERNAME as string | undefined)?.replace(/^@/, "") || "";
+const SUPPORT_USERNAME = "oxescrow";
 
 export const AccountPage = ({ onBack, onOpenCart, onOpenActiveOrder }: AccountPageProps) => {
   const lang = useI18n((s) => s.lang) ?? "ru";
@@ -138,10 +138,6 @@ export const AccountPage = ({ onBack, onOpenCart, onOpenActiveOrder }: AccountPa
 
   // ── Поддержка ────────────────────────────────────────────────
   const openSupport = () => {
-    if (!SUPPORT_USERNAME) {
-      toast.error(tr("Контакт поддержки не настроен", "Support contact not set"));
-      return;
-    }
     const url = `https://t.me/${SUPPORT_USERNAME}`;
     const tgAny = tg as any;
     if (tgAny?.openTelegramLink) tgAny.openTelegramLink(url);
