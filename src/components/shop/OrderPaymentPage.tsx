@@ -46,6 +46,7 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
 
   const addOrder = useAccount((s) => s.addOrder);
   const hydrateAccount = useAccount((s) => s.hydrate);
+  const hasAwaitingOrder = useAccount((s) => s.orders.some((o) => o.status === "awaiting"));
   const { user } = useTelegram();
 
   const [crypto, setCrypto] = useState<CryptoCode>("USDT");
@@ -72,7 +73,15 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
   const realLines = lines.filter((l) => !l.isGift);
 
   const handlePaid = async () => {
-    if (realLines.length === 0 || submitting) return;
+    if (submitting) return;
+    if (hasAwaitingOrder) {
+      clearCart();
+      await hydrateAccount().catch(() => {});
+      toast.success(tr("Ждём подтверждения", "Waiting for confirmation"));
+      onPaid();
+      return;
+    }
+    if (realLines.length === 0) return;
     setSubmitting(true);
     const customerName = user?.first_name
       ? `${user.first_name}${user.last_name ? " " + user.last_name : ""}${user.username ? ` (@${user.username})` : ""}`
@@ -91,6 +100,7 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
       });
       haptic("success");
       clearCart();
+      await hydrateAccount().catch(() => {});
       toast.success(tr("Ждём подтверждения", "Waiting for confirmation"));
       onPaid();
     } catch (e: any) {
