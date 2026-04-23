@@ -247,18 +247,8 @@ export const AccountPage = ({ onBack, onOpenCart, onOpenActiveOrder }: AccountPa
 
         {/* ── Поддержка ──────────────────────────────────────── */}
         <section>
-          <a
-            href={`https://t.me/${SUPPORT_USERNAME}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              const tgAny = tg as any;
-              if (tgAny?.openTelegramLink) {
-                e.preventDefault();
-                tgAny.openTelegramLink(`https://t.me/${SUPPORT_USERNAME}`);
-              }
-              haptic("light");
-            }}
+          <button
+            onClick={openSupport}
             className="w-full rounded-2xl bg-card shadow-card p-4 flex items-center gap-3 active:scale-[0.99]"
           >
             <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
@@ -267,10 +257,10 @@ export const AccountPage = ({ onBack, onOpenCart, onOpenActiveOrder }: AccountPa
             <div className="flex-1 text-left">
               <div className="font-bold text-sm">{tr("Поддержка", "Support")}</div>
               <div className="text-[11px] text-muted-foreground">
-                {tr("Написать оператору @oxescrow в Telegram", "Message @oxescrow on Telegram")}
+                {tr("Написать оператору в Telegram", "Message an operator on Telegram")}
               </div>
             </div>
-          </a>
+          </button>
         </section>
 
         {/* ── История заказов ───────────────────────────────── */}
