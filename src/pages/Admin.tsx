@@ -128,6 +128,9 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
           <span className="w-10" />
         </header>
         <Tabs defaultValue="deposits">
+          <TabsList className="sr-only">
+            <TabsTrigger value="deposits">deposits</TabsTrigger>
+          </TabsList>
           <DepositsTab />
         </Tabs>
       </div>
@@ -148,6 +151,9 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
           <span className="w-10" />
         </header>
         <Tabs defaultValue="analytics">
+          <TabsList className="sr-only">
+            <TabsTrigger value="analytics">analytics</TabsTrigger>
+          </TabsList>
           <AnalyticsTab />
         </Tabs>
       </div>
@@ -168,6 +174,9 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
           <span className="w-10" />
         </header>
         <Tabs defaultValue="broadcast">
+          <TabsList className="sr-only">
+            <TabsTrigger value="broadcast">broadcast</TabsTrigger>
+          </TabsList>
           <BroadcastTab />
         </Tabs>
       </div>
