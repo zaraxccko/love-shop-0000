@@ -345,25 +345,83 @@ export async function adminRoutes(app: FastifyInstance) {
   // ==================================================================
 
   app.get("/admin/analytics", { preHandler: requireAdmin }, async () => {
-    const [usersCount, ordersAgg, depositsAgg] = await Promise.all([
-      prisma.user.count(),
-      prisma.order.aggregate({
-        _sum: { totalUSD: true },
-        _count: true,
-        where: { status: { in: ["paid", "in_delivery", "completed"] } },
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOf7d = new Date(startOfToday);
+    startOf7d.setDate(startOf7d.getDate() - 6);
+    const startOf30d = new Date(startOfToday);
+    startOf30d.setDate(startOf30d.getDate() - 29);
+
+    const [
+      users,
+      ordersAll,
+      confirmedDeposits,
+      depositsAll,
+    ] = await Promise.all([
+      prisma.user.findMany({ select: { tgId: true, createdAt: true } }),
+      prisma.order.findMany({
+        select: { id: true, totalUSD: true, status: true, createdAt: true, userTgId: true, items: true },
       }),
-      prisma.deposit.aggregate({
-        _sum: { amountUSD: true },
-        _count: true,
+      prisma.deposit.findMany({
         where: { status: "confirmed" },
+        select: { id: true, amountUSD: true, createdAt: true, confirmedAt: true, userTgId: true },
+      }),
+      prisma.deposit.findMany({
+        select: { id: true, status: true, createdAt: true, paidAt: true, confirmedAt: true, userTgId: true },
       }),
     ]);
+
+    const paidLikeOrders = ordersAll.filter((o) => ["paid", "in_delivery", "completed", "awaiting"].includes(o.status));
+    const orderUsers = new Set(paidLikeOrders.map((o) => o.userTgId.toString()));
+    const confirmedDepositUsers = new Set(confirmedDeposits.map((d) => d.userTgId.toString()));
+    const activeUserIds = new Set<string>([
+      ...ordersAll.map((o) => o.userTgId.toString()),
+      ...depositsAll.map((d) => d.userTgId.toString()),
+    ]);
+
+    const totals = {
+      users: users.length,
+      activations: users.length,
+      dau: countDistinctUsersSince(activeUserIdsFromRows(ordersAll, depositsAll), startOfToday),
+      wau: countDistinctUsersSince(activeUserIdsFromRows(ordersAll, depositsAll), startOf7d),
+      mau: countDistinctUsersSince(activeUserIdsFromRows(ordersAll, depositsAll), startOf30d),
+      gmvUSD: round2(paidLikeOrders.reduce((sum, order) => sum + order.totalUSD, 0)),
+      ordersToday: paidLikeOrders.filter((o) => o.createdAt >= startOfToday).length,
+      avgCheckUSD: paidLikeOrders.length ? round2(paidLikeOrders.reduce((sum, order) => sum + order.totalUSD, 0) / paidLikeOrders.length) : 0,
+    };
+
     return {
-      users: usersCount,
-      ordersTotal: ordersAgg._count,
-      ordersRevenue: ordersAgg._sum.totalUSD ?? 0,
-      depositsTotal: depositsAgg._count,
-      depositsAmount: depositsAgg._sum.amountUSD ?? 0,
+      totals,
+      funnel: {
+        starts: users.length,
+        captchaPassed: users.length,
+        miniAppOpened: users.length,
+        firstOrder: orderUsers.size,
+      },
+      depositsFunnel: {
+        created: depositsAll.length,
+        paid: depositsAll.filter((d) => !!d.paidAt || d.status === "awaiting" || d.status === "confirmed").length,
+        confirmed: confirmedDeposits.length,
+      },
+      activations7d: buildDailySeries(startOf7d, 7, (dayStart, dayEnd) => users.filter((u) => u.createdAt >= dayStart && u.createdAt < dayEnd).length),
+      dau7d: buildDailySeries(startOf7d, 7, (dayStart, dayEnd) => {
+        const usersInDay = new Set<string>();
+        for (const order of ordersAll) {
+          if (order.createdAt >= dayStart && order.createdAt < dayEnd) usersInDay.add(order.userTgId.toString());
+        }
+        for (const deposit of depositsAll) {
+          if (deposit.createdAt >= dayStart && deposit.createdAt < dayEnd) usersInDay.add(deposit.userTgId.toString());
+        }
+        return usersInDay.size;
+      }),
+      topProducts: buildTopProducts(paidLikeOrders),
+      sources: [
+        { source: "telegram", users: users.length },
+        { source: "buyers", users: orderUsers.size },
+        { source: "depositors", users: confirmedDepositUsers.size },
+        { source: "active", users: activeUserIds.size },
+      ],
     };
   });
 
@@ -435,4 +493,65 @@ function customerOf(u: any) {
     name,
     username: u.username ?? undefined,
   };
+}
+
+function round2(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+function buildDailySeries(startDate: Date, days: number, getValue: (dayStart: Date, dayEnd: Date) => number) {
+  return Array.from({ length: days }, (_, index) => {
+    const dayStart = new Date(startDate);
+    dayStart.setDate(startDate.getDate() + index);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+    return {
+      date: dayStart.toISOString().slice(5, 10),
+      value: getValue(dayStart, dayEnd),
+    };
+  });
+}
+
+function activeUserIdsFromRows(
+  orders: { userTgId: bigint; createdAt: Date }[],
+  deposits: { userTgId: bigint; createdAt: Date }[]
+) {
+  return {
+    orders,
+    deposits,
+  };
+}
+
+function countDistinctUsersSince(
+  rows: { orders: { userTgId: bigint; createdAt: Date }[]; deposits: { userTgId: bigint; createdAt: Date }[] },
+  from: Date
+) {
+  const ids = new Set<string>();
+  for (const order of rows.orders) {
+    if (order.createdAt >= from) ids.add(order.userTgId.toString());
+  }
+  for (const deposit of rows.deposits) {
+    if (deposit.createdAt >= from) ids.add(deposit.userTgId.toString());
+  }
+  return ids.size;
+}
+
+function buildTopProducts(orders: { items: any; totalUSD: number }[]) {
+  const stats = new Map<string, { name: string; orders: number; gmvUSD: number }>();
+  for (const order of orders) {
+    const items = Array.isArray(order.items) ? order.items : [];
+    for (const item of items) {
+      const nameValue = item?.productName ?? item?.product?.name ?? item?.name;
+      const name = typeof nameValue === "string" ? nameValue : nameValue?.ru ?? nameValue?.en ?? item?.productId ?? "Товар";
+      const current = stats.get(name) ?? { name, orders: 0, gmvUSD: 0 };
+      current.orders += Number(item?.qty ?? 1);
+      current.gmvUSD += Number(item?.priceUSD ?? 0) * Number(item?.qty ?? 1);
+      stats.set(name, current);
+    }
+  }
+  return Array.from(stats.values())
+    .sort((a, b) => b.orders - a.orders || b.gmvUSD - a.gmvUSD)
+    .slice(0, 5)
+    .map((item) => ({ ...item, gmvUSD: round2(item.gmvUSD) }));
 }
