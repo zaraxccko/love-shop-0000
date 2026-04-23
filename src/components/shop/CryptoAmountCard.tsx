@@ -59,10 +59,11 @@ export const CryptoAmountCard = ({ amountUSD, crypto, cryptoName }: Props) => {
       {formatted && (
         <button
           onClick={() => copy(formatted)}
+          aria-label={tr("Скопировать сумму", "Copy amount")}
           className="w-full flex items-center justify-center gap-2 gradient-primary text-primary-foreground rounded-xl py-2.5 text-sm font-bold active:scale-[0.98] shadow-glow"
         >
           <Copy className="w-4 h-4" />
-          {tr("Скопировать сумму", "Copy amount")}
+          <span>{formatted} {crypto}</span>
         </button>
       )}
 
