@@ -5,13 +5,19 @@ import { requireAuth } from "../auth/middleware.js";
 import { notifyAdmins } from "../bot.js";
 
 const CartLineSchema = z.object({
-  productId: z.string(),
+  productId: z.string().optional(),
+  product: z.any().optional(),
   productName: z.any().optional(),
   qty: z.number().int().positive().max(99),
   variantId: z.string().optional(),
   districtSlug: z.string().optional(),
   stashType: z.enum(["prikop", "klad", "magnit"]).optional(),
   priceUSD: z.number().nonnegative().optional(),
+}).superRefine((item, ctx) => {
+  const productId = item.productId ?? item.product?.id;
+  if (!productId || typeof productId !== "string") {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "product_id_required", path: ["productId"] });
+  }
 });
 
 const CreateOrderSchema = z.object({
@@ -34,6 +40,12 @@ export async function orderRoutes(app: FastifyInstance) {
       return reply.code(400).send({ error: "delivery_address_required" });
     }
 
+    const snapshotItems = data.items.map((item) => ({
+      ...item,
+      productId: item.productId ?? item.product?.id,
+      productName: item.productName ?? item.product?.name,
+    }));
+
     const order = await prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({ where: { tgId: req.user!.tgId } });
       if (!user) throw new Error("user_not_found");
@@ -48,7 +60,7 @@ export async function orderRoutes(app: FastifyInstance) {
         data: {
           userTgId: user.tgId,
           totalUSD: data.totalUSD,
-          items: data.items as any,
+          items: snapshotItems as any,
           delivery: data.delivery,
           deliveryAddress: data.deliveryAddress,
           crypto: data.crypto,
@@ -61,6 +73,11 @@ export async function orderRoutes(app: FastifyInstance) {
         reply.code(402).send({ error: "insufficient_balance" });
         return null;
       }
+      if (e.message === "user_not_found") {
+        reply.code(401).send({ error: "unauthorized" });
+        return null;
+      }
+      req.log.error({ err: e }, "failed to create order");
       reply.code(500).send({ error: "internal" });
       return null;
     });
