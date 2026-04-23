@@ -86,7 +86,6 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
     const customerName = user?.first_name
       ? `${user.first_name}${user.last_name ? " " + user.last_name : ""}${user.username ? ` (@${user.username})` : ""}`
       : user?.username ? `@${user.username}` : undefined;
-    // Снимаем снэпшот для отправки на бэк ДО очистки корзины.
     const snapshot = {
       totalUSD: total,
       items: lines,
@@ -98,21 +97,18 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
       crypto,
       payAddress: cryptoMeta.address,
     };
-    // Сразу чистим корзину и переводим UI в режим ожидания — независимо от ответа сети.
-    clearCart();
-    haptic("success");
-    toast.success(tr("Ждём подтверждения", "Waiting for confirmation"));
-    onPaid();
     try {
       await addOrder(snapshot);
+      clearCart();
+      haptic("success");
+      toast.success(tr("Ждём подтверждения", "Waiting for confirmation"));
+      onPaid();
       await hydrateAccount().catch(() => {});
     } catch (e: any) {
       const code = e?.body?.error;
-      if (code === "order_already_submitted") {
-        await hydrateAccount().catch(() => {});
-        return;
-      }
-      const msg = code === "insufficient_balance"
+      const msg = code === "order_already_submitted"
+        ? tr("Заявка уже отправлена", "Order already submitted")
+        : code === "insufficient_balance"
         ? tr("Недостаточно средств на балансе", "Not enough balance")
         : code === "delivery_address_required"
         ? tr("Укажите адрес доставки", "Enter delivery address")
@@ -124,6 +120,7 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
       haptic("error");
       toast.error(msg);
       console.error("[order] create failed", e);
+    } finally {
       setSubmitting(false);
     }
   };
