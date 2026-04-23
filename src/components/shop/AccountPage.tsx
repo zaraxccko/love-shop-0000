@@ -42,8 +42,19 @@ export const AccountPage = ({ onBack, onTopUp, onOpenCart, onOpenActiveOrder }: 
   const reservedAt = useCart((s) => s.reservedAt);
   const clearCart = useCart((s) => s.clear);
 
-  /** Самый свежий заказ, ожидающий подтверждения админом. */
-  const awaitingOrder = orders.find((o) => o.status === "awaiting") ?? null;
+  /**
+   * Активная карточка: либо заказ в ожидании, либо только что подтверждённый
+   * (показываем данные от админа, пока юзер не закроет/не сделает новый заказ).
+   * Отменённые заказы сюда не попадают — они уходят сразу в историю.
+   */
+  const activeOrder =
+    orders.find((o) => o.status === "awaiting") ??
+    orders.find((o) => (o.status === "completed" || o.status === "paid" || o.status === "in_delivery") && (o.confirmPhoto || o.confirmText)) ??
+    null;
+  const awaitingOrder = activeOrder?.status === "awaiting" ? activeOrder : null;
+  const confirmedOrder = activeOrder && activeOrder.status !== "awaiting" ? activeOrder : null;
+  // Скрываем подтверждённый заказ из истории, чтобы не дублировать.
+  const historyOrders = orders.filter((o) => o.id !== confirmedOrder?.id);
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
