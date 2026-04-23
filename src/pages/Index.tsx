@@ -27,6 +27,9 @@ import { toast } from "sonner";
 import type { Product } from "@/types/shop";
 import AdminPage from "./Admin";
 
+type Screen = "shop" | "account" | "deposit" | "order-payment";
+type OrderPaymentOrigin = "shop" | "account";
+
 const Index = () => {
   const t = useT();
   const lang = useI18n((s) => s.lang);
@@ -63,10 +66,9 @@ const Index = () => {
   const [showLocPicker, setShowLocPicker] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [openProduct, setOpenProduct] = useState<Product | null>(null);
-  const [showAccount, setShowAccount] = useState(false);
-  const [depositOpen, setDepositOpen] = useState(false);
+  const [screen, setScreen] = useState<Screen>("shop");
   const [depositSuggested, setDepositSuggested] = useState<number | undefined>(undefined);
-  const [orderPayOpen, setOrderPayOpen] = useState(false);
+  const [orderPaymentOrigin, setOrderPaymentOrigin] = useState<OrderPaymentOrigin>("shop");
 
   const cartLines = useCart((s) => s.lines);
   const cartDelivery = useCart((s) => s.delivery);
@@ -80,7 +82,8 @@ const Index = () => {
       return;
     }
     setCartOpen(false);
-    setOrderPayOpen(true);
+    setOrderPaymentOrigin("shop");
+    setScreen("order-payment");
   };
 
   const cityInfo = city ? findCity(city) : null;
@@ -137,34 +140,45 @@ const Index = () => {
       />
     );
 
-  if (depositOpen)
+  if (screen === "deposit")
     return (
       <DepositPage
         suggested={depositSuggested}
-        onBack={() => { setDepositOpen(false); setDepositSuggested(undefined); }}
-        onDone={() => {
-          setDepositOpen(false);
+        onBack={() => {
           setDepositSuggested(undefined);
-          setShowAccount(true);
+          setScreen("account");
+        }}
+        onDone={() => {
+          setDepositSuggested(undefined);
+          setScreen("account");
         }}
       />
     );
 
-  if (orderPayOpen)
+  if (screen === "order-payment")
     return (
       <OrderPaymentPage
-        onBack={() => setOrderPayOpen(false)}
-        onPaid={() => { setOrderPayOpen(false); setShowAccount(true); }}
+        onBack={() => setScreen(orderPaymentOrigin === "account" ? "account" : "shop")}
+        onPaid={() => setScreen("account")}
       />
     );
 
-  if (showAccount)
+  if (screen === "account")
     return (
       <AccountPage
-        onBack={() => setShowAccount(false)}
-        onTopUp={() => { setShowAccount(false); setDepositSuggested(undefined); setDepositOpen(true); }}
-        onOpenCart={() => { setShowAccount(false); setCartOpen(true); }}
-        onOpenActiveOrder={() => { setShowAccount(false); setOrderPayOpen(true); }}
+        onBack={() => setScreen("shop")}
+        onTopUp={() => {
+          setDepositSuggested(undefined);
+          setScreen("deposit");
+        }}
+        onOpenCart={() => {
+          setScreen("shop");
+          setCartOpen(true);
+        }}
+        onOpenActiveOrder={() => {
+          setOrderPaymentOrigin("account");
+          setScreen("order-payment");
+        }}
       />
     );
 
@@ -175,7 +189,7 @@ const Index = () => {
         onLocationClick={() => setShowLocPicker(true)}
         showAdminButton={isAdmin}
         onAdminClick={() => setShowAdmin(true)}
-        onAccountClick={() => setShowAccount(true)}
+        onAccountClick={() => setScreen("account")}
       />
 
       <main className="pb-32">
