@@ -282,7 +282,11 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
             <CryptoAmountCard
               amountUSD={total}
               crypto={crypto}
-              cryptoName={`${cryptoMeta.name} · ${cryptoMeta.network}`}
+              cryptoName={
+                cryptoMeta.name === cryptoMeta.network || cryptoMeta.code === cryptoMeta.network
+                  ? cryptoMeta.name
+                  : `${cryptoMeta.name} · ${cryptoMeta.network}`
+              }
             />
 
             {/* Wallet address */}
