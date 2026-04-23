@@ -320,10 +320,11 @@ export const OrderPaymentPage = ({ onBack, onPaid }: OrderPaymentPageProps) => {
 
             <button
               onClick={handlePaid}
-              className="w-full gradient-primary text-primary-foreground font-bold py-4 rounded-2xl shadow-glow active:scale-[0.98] flex items-center justify-center gap-2"
+              disabled={submitting}
+              className="w-full gradient-primary text-primary-foreground font-bold py-4 rounded-2xl shadow-glow active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Check className="w-5 h-5" />
-              {tr("Я оплатил", "I have paid")}
+              {submitting ? tr("Отправляем…", "Sending…") : tr("Я оплатил", "I have paid")}
             </button>
           </>
         )}
