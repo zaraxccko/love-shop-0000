@@ -29,7 +29,7 @@ interface Cell {
   scale: number;
 }
 
-const DECOYS = ["🍓", "🍉", "🌙", "🎾"];
+const DECOYS = ["🪺", "🧊", "🧸", "🤍", "🍭"];
 
 function buildBoard(): { cells: Cell[]; targetIndex: number } {
   const targetIndex = Math.floor(Math.random() * CELLS);
