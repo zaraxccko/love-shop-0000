@@ -4,15 +4,28 @@ import { prisma } from "../db.js";
 import { requireAuth } from "../auth/middleware.js";
 import { notifyAdmins } from "../bot.js";
 
-const CartLineSchema = z.object({
-  productId: z.string(),
+const CartLineSchema = z.preprocess((raw) => {
+  if (!raw || typeof raw !== "object") return raw;
+  const item = raw as Record<string, any>;
+  const product = item.product && typeof item.product === "object" ? item.product : null;
+  return {
+    productId: item.productId ?? product?.id,
+    productName: item.productName ?? product?.name,
+    qty: item.qty,
+    variantId: item.variantId,
+    districtSlug: item.districtSlug,
+    stashType: item.stashType,
+    priceUSD: item.priceUSD,
+  };
+}, z.object({
+  productId: z.string().min(1),
   productName: z.any().optional(),
   qty: z.number().int().positive().max(99),
   variantId: z.string().optional(),
   districtSlug: z.string().optional(),
   stashType: z.enum(["prikop", "klad", "magnit"]).optional(),
   priceUSD: z.number().nonnegative().optional(),
-});
+}));
 
 const CreateOrderSchema = z.object({
   totalUSD: z.number().nonnegative().max(1000000),
@@ -61,6 +74,11 @@ export async function orderRoutes(app: FastifyInstance) {
         reply.code(402).send({ error: "insufficient_balance" });
         return null;
       }
+      if (e.message === "user_not_found") {
+        reply.code(401).send({ error: "unauthorized" });
+        return null;
+      }
+      req.log.error({ err: e }, "failed to create order");
       reply.code(500).send({ error: "internal" });
       return null;
     });
