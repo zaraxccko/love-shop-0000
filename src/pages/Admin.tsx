@@ -1056,25 +1056,31 @@ const DepositsTab = ({ standalone = false }: { standalone?: boolean }) => {
   void messageOrder;
 
   const [confirmTarget, setConfirmTarget] = useState<OrderRecord | null>(null);
-  const [photo, setPhoto] = useState<string>("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [text, setText] = useState<string>("");
 
-  const onPhoto = async (file: File | undefined) => {
-    if (!file) return;
-    const data = await new Promise<string>((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result as string);
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
-    setPhoto(data);
+  const onPhoto = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const arr = Array.from(files);
+    const datas = await Promise.all(
+      arr.map(
+        (file) =>
+          new Promise<string>((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result as string);
+            r.onerror = rej;
+            r.readAsDataURL(file);
+          })
+      )
+    );
+    setPhotos((prev) => [...prev, ...datas].slice(0, 10));
   };
 
   const submitConfirm = () => {
     if (!confirmTarget) return;
-    confirmOrder(confirmTarget.id, { photo: photo || undefined, text: text || undefined });
+    confirmOrder(confirmTarget.id, { photos: photos.length ? photos : undefined, text: text || undefined });
     setConfirmTarget(null);
-    setPhoto("");
+    setPhotos([]);
     setText("");
   };
 
