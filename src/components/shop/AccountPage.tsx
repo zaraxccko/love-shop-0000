@@ -259,16 +259,33 @@ export const AccountPage = ({ onBack, onOpenCart, onOpenActiveOrder }: AccountPa
                         🚚 {tr("Доставка", "Delivery")}{o.deliveryAddress ? ` · ${o.deliveryAddress}` : ""}
                       </div>
                     )}
-                    {(o.confirmPhoto || o.confirmText) && (
+                    {((o.confirmPhotos && o.confirmPhotos.length > 0) || o.confirmPhoto || o.confirmText) && (
                       <div className="mt-2 rounded-xl bg-primary/5 border border-primary/20 p-2.5 space-y-2">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-primary">
                           {tr("Сообщение от магазина", "Message from shop")}
                         </div>
-                        {o.confirmPhoto && (
-                          <a href={o.confirmPhoto} target="_blank" rel="noreferrer" className="block">
-                            <img src={o.confirmPhoto} alt="confirm" className="w-full max-h-64 object-cover rounded-lg" />
-                          </a>
-                        )}
+                        {(() => {
+                          const list = o.confirmPhotos && o.confirmPhotos.length > 0
+                            ? o.confirmPhotos
+                            : (o.confirmPhoto ? [o.confirmPhoto] : []);
+                          if (list.length === 0) return null;
+                          if (list.length === 1) {
+                            return (
+                              <a href={list[0]} target="_blank" rel="noreferrer" className="block">
+                                <img src={list[0]} alt="confirm" className="w-full max-h-64 object-cover rounded-lg" />
+                              </a>
+                            );
+                          }
+                          return (
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {list.map((src, i) => (
+                                <a key={i} href={src} target="_blank" rel="noreferrer" className="block">
+                                  <img src={src} alt={`confirm-${i}`} className="w-full h-32 object-cover rounded-lg" />
+                                </a>
+                              ))}
+                            </div>
+                          );
+                        })()}
                         {o.confirmText && (
                           <div className="text-xs text-foreground/90 whitespace-pre-wrap">{o.confirmText}</div>
                         )}
