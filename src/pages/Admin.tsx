@@ -127,12 +127,7 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
           </h1>
           <span className="w-10" />
         </header>
-        <Tabs defaultValue="deposits">
-          <TabsList className="sr-only">
-            <TabsTrigger value="deposits">deposits</TabsTrigger>
-          </TabsList>
-          <DepositsTab />
-        </Tabs>
+        <DepositsTab standalone />
       </div>
     );
   }
@@ -1050,7 +1045,7 @@ const AdminPage = ({ onExit }: AdminPageProps) => {
   );
 };
 
-const DepositsTab = () => {
+const DepositsTab = ({ standalone = false }: { standalone?: boolean }) => {
   const orders = useAdminPanel((s) => s.awaitingOrders);
   const historyOrders = useAdminPanel((s) => s.historyOrders);
   const confirmOrder = useAdminPanel((s) => s.confirmOrder);
@@ -1121,8 +1116,8 @@ const DepositsTab = () => {
     cancelled: "bg-destructive/10 text-destructive",
   };
 
-  return (
-    <TabsContent value="deposits" className="space-y-3 mt-4">
+  const content = (
+    <div className="space-y-3 mt-4">
       {/* === Заявки на оплату ЗАКАЗА (товары) === */}
       <div>
         <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">
@@ -1353,8 +1348,12 @@ const DepositsTab = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </TabsContent>
+    </div>
   );
+
+  if (standalone) return content;
+
+  return <TabsContent value="deposits" className="space-y-3 mt-4">{content}</TabsContent>;
 };
 
 export default AdminPage;
