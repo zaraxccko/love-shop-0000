@@ -322,6 +322,61 @@ export const AccountPage = ({ onBack, onOpenCart, onOpenActiveOrder }: AccountPa
         </section>
 
       </main>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightbox(null); }}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white active:scale-95"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {lightbox.images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  haptic("light");
+                  setLightbox((l) => l ? { ...l, index: (l.index - 1 + l.images.length) % l.images.length } : l);
+                }}
+                className="absolute left-3 w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white active:scale-95"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  haptic("light");
+                  setLightbox((l) => l ? { ...l, index: (l.index + 1) % l.images.length } : l);
+                }}
+                className="absolute right-3 w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white active:scale-95"
+                aria-label="Next"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-white text-xs font-medium">
+                {lightbox.index + 1} / {lightbox.images.length}
+              </div>
+            </>
+          )}
+
+          <img
+            src={lightbox.images[lightbox.index]}
+            alt={`photo-${lightbox.index}`}
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-[92vw] max-h-[85vh] object-contain rounded-lg"
+          />
+        </div>
+      )}
     </div>
   );
 };
